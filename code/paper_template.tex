@@ -1,0 +1,157 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Pagella}
+\newfontfamily\headfont{Inter}[UprightFont=*-ExtraBold,BoldFont=*-ExtraBold,Extension=.otf,Path=/usr/share/fonts/opentype/inter/]
+\usepackage[a4paper,margin=2.3cm]{geometry}
+\usepackage{graphicx,booktabs,float,caption,array,xcolor,longtable}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\usepackage{titlesec}
+\usepackage[round]{natbib}
+\usepackage{setspace}
+\setstretch{1.05}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+\titleformat{\section}{\headfont\Large}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\headfont\large}{\thesubsection}{0.8em}{}
+\captionsetup{font=small,labelfont=bf}
+\urlstyle{same}
+\hypersetup{pdftitle={Pirate Hotspots, Then and Now},pdfauthor={Tristan Hotham}}
+
+\begin{document}
+\begin{center}
+{\Large\bfseries Pirate Hotspots, Then and Now\par}
+\vspace{0.4em}
+{\large How maritime piracy moved around the world:\\{{n|int}} mapped attacks, 1993 to 2020, and IMB counts to 2026\par}
+\vspace{1.2em}
+{\large Tristan Hotham\par}
+\vspace{0.3em}
+{\small Independent researcher\\
+ORCID: 0000-0003-4931-9349\\
+DOI: \href{https://doi.org/{{meta.doi}}}{https://doi.org/{{meta.doi}}}\par}
+\vspace{0.8em}
+2026
+\end{center}
+
+\begin{quote}
+\small
+\begin{center}\textbf{Abstract}\end{center}
+Maritime piracy is often pictured through one episode, the Somali hijackings of the late 2000s, but its geography has shifted repeatedly. Using the Crime at Sea database of {{n|int}} geolocated attacks and attempted attacks from 1993 to 2020, compiled from International Maritime Bureau (IMB) and US National Geospatial-Intelligence Agency reports, I map piracy year by year and trace how its hotspots moved. In the 1990s the South China Sea and East Asian waters led ({{scs.pct_93_99|pc}} of attacks in 1993 to 1999), followed by Indonesia, which peaked at {{idn.peak_n|int}} attacks in {{idn.peak_year|raw}}. The Strait of Malacca peaked at {{mal.peak_n|int}} attacks in {{mal.peak_year|raw}} and averaged {{mal.avg_06_20|f1}} a year from 2006. Attacks in Somali waters and the Gulf of Aden rose from {{som.n_2007|int}} in 2007 to {{som.peak_n|int}} in {{som.peak_year|raw}}, making up {{som.pct_world_08_11|pc}} of all attacks and {{som.hij_pct_world_08_11|pc}} of hijackings in 2008 to 2011, with a median distance from shore of {{som.median_km_08_11|int}} km against {{not_som_km_08_11|f1}} km elsewhere in those years, and then fell by {{som.drop_pc_11_13|pc}} in two years. The Gulf of Guinea became the leading region, with {{gog.pct_2020|pc}} of attacks in 2020. IMB headline counts carry the story to 2026: the Singapore Strait recorded {{imb.sin_2025|int}} incidents in 2025, {{imb.sin_pct_2025|pc}} of the world total, and all {{imb.hij_q3_2026|int}} hijackings reported in January to September 2026 were by Somali pirates. Most attacks are thefts from ships at anchor close to shore, in busy shipping lanes and in poorer countries; the hotspots move with enforcement, opportunity and the routes of trade.
+
+\textbf{Keywords:} maritime piracy; armed robbery at sea; Somalia; Strait of Malacca; Singapore Strait; Gulf of Guinea; IMB; spatial analysis; shipping density; open data
+\end{quote}
+
+\section{Introduction}
+Piracy, and the armed robbery against ships that the IMB counts alongside it, is one of the oldest crimes at sea and one of the best recorded. Since 1991 the IMB Piracy Reporting Centre in Kuala Lumpur has collected reports from shipmasters and owners and published them in quarterly and annual reports \citep{imb}. The US National Geospatial-Intelligence Agency publishes a parallel series of Anti-Shipping Activity Messages \citep{asam}. Researchers have turned these reports into event datasets to study the causes of piracy \citep{coggins,daxecker} and the effect of counter-piracy measures \citep{shortland,bueger}.
+
+This paper asks a simpler, descriptive question: where has piracy happened, and how have its hotspots moved, from 1993 to today? It uses an open, geolocated database of {{n|int}} attacks \citep{benden}, the IMB's headline counts for 2021 to 2026, and a global map of ship traffic \citep{wbships}, and is accompanied by an interactive map with a year slider (\url{{{meta.page}}}).
+
+\section{Data}
+\textbf{Attacks, 1993 to 2020.} The Crime at Sea database \citep{benden} gives {{n|int}} attacks with a date, latitude and longitude, attack type (attempted, boarded, hijacked and, from 2015, fired upon), the state of the ship (anchored, berthed or steaming), vessel name, the nearest country and the country whose exclusive economic zone (EEZ) contains the position, and the distance to the nearest shore. Records for 1993 to 2014 ({{src_mapping|int}}) come from the MAPPING piracy data compiled by Brandon Prins from IMB and ASAM reports; records for 2015 to 2020 ({{src_imb|int}}) were taken from IMB reports and include the IMB's narrative. I used the copy published on GitHub with the paper (CC BY 4.0).
+
+\textbf{IMB headline counts, 2021 to 2026.} The database ends in 2020. For later years I transcribed the headline numbers from the IMB's annual reports and press releases: world totals for 2021 to 2025 and for January to September 2025 and 2026, and, where the releases give them, incidents in the Singapore Strait, Indonesia and the Gulf of Guinea, hijackings and crew taken hostage or kidnapped (Table~\ref{tab:imb}). These are not geolocated and are kept separate in every figure.
+
+\textbf{Shipping density.} The World Bank and IMF Global Shipping Traffic Density raster counts AIS positions from January 2015 to February 2021 \citep{wbships,cerdeiro}. I used the 0.08 degree overview of the all-vessels layer. Because the overview subsamples the full-resolution raster, I use it only averaged over 1 degree squares (about 144 samples each).
+
+\textbf{Country indicators and geography.} The database comes with yearly country indicators, including GDP per person and the Corruption Perceptions Index, which I use only descriptively. Outlines are from Natural Earth \citep{naturalearth}.
+
+\section{Methods}
+\textbf{Attack types.} The source codes boardings as ``Boarded'' in some years and ``Boarding'' in others; I merged them. ``Fired upon'' appears {{fired_before_2015|int}} times before 2015 and {{fired_from_2015|int}} times from 2015, so earlier ships fired upon but not boarded are mostly coded as attempted; the {{n_1993_untyped|int}} attacks of 1993 have no type.
+
+\textbf{Regions.} Each attack is assigned to one region by the first rule that applies: the Singapore Strait (a box from 103.42 to 104.65$^\circ$E and 0.85 to 1.60$^\circ$N, including the Batam and Bintan anchorages); the Strait of Malacca (a polygon from the Andaman Sea entrance to the western end of the Singapore Strait); Indonesian waters (nearest country or EEZ Indonesia or Timor-Leste); the South China Sea, Philippines and East Asia; the Indian subcontinent (within 300 km of India, Bangladesh, Sri Lanka, Pakistan or the Maldives); the East African coast (within 60 km of Kenya to South Africa, Madagascar and the Comoros); Somali waters (everything else between 32 and 80$^\circ$E and 15$^\circ$S and 30$^\circ$N, outside the Persian Gulf, which includes the Gulf of Aden, the southern Red Sea, the Somali Basin and the Arabian Sea); the Gulf of Guinea and West Africa (30$^\circ$W to 16$^\circ$E, 20$^\circ$S to 20$^\circ$N); the Americas; and elsewhere. Table~\ref{tab:regions} gives the totals.
+
+\textbf{Eras and hotspots.} I divide the period into six eras that follow the main shifts: 1993 to 1999, 2000 to 2004, 2005 to 2007, 2008 to 2011, 2012 to 2015 and 2016 to 2020. Hotspots are 1 degree squares, named from the location descriptions of the attacks in them. The maps use hexagons about 4 degrees across.
+
+\textbf{Distance from shore and traffic.} Distances are the source's great-circle distances to the nearest coast. For traffic, I rank all 1 degree squares with any AIS traffic ({{ship.cells|int}}) by mean density and record the percentile of the square each attack fell in.
+
+\section{Results}
+\subsection{Totals}
+Reported attacks rose from {{low_n|int}} in {{low_year|raw}} to {{peak_n|int}} in {{peak_year|raw}}, stayed above {{min_00_11|int}} a year until 2011, and fell to {{n_2020|int}} in 2020 (Figure~\ref{fig:years}). The IMB counted {{imb.y2021|int}} incidents in 2021, {{imb.y2022|int}} in 2022, {{imb.y2023|int}} in 2023, {{imb.y2024|int}} in 2024 and {{imb.y2025|int}} in 2025, and {{imb.q3_2026|int}} in January to September 2026. The IMB's 2022 total is {{imb.low_vs_peak_pc|pc}} below the database's {{peak_year|raw}} peak.
+
+\begin{figure}[tbp]\centering\includegraphics[width=\textwidth]{f_years.png}
+\caption{Attacks per year by region, 1993 to 2020 (Crime at Sea database), and IMB headline incident counts for all regions, 2021 to 2025 and January to September 2026 (hatched).}\label{fig:years}\end{figure}
+
+{{TABLE_REGIONS}}
+
+\subsection{How the hotspots moved}
+Figure~\ref{fig:eras} shows the six eras side by side and Table~\ref{tab:hotspots} the busiest squares in each.
+
+\textbf{1993 to 1999: the South China Sea and Indonesia.} The South China Sea, Philippines and East Asian waters had {{scs.n_93_99|int}} attacks ({{scs.pct_93_99|pc}}), led by waters off China and Hong Kong and around the Philippines; Indonesia had {{eras.0.by_region.6|int}} and overtook them in 1998. Across 1993 to 2004 the waters of Southeast and East Asia, including the two straits, held {{sea93.pct_93_04|pc}} of all attacks. The busiest squares were anchorages: Jakarta and Tanjung Priok, Chittagong and Belawan.
+
+\textbf{2000 to 2004: the Strait of Malacca.} The Malacca Strait peaked at {{mal.peak_n|int}} attacks in {{mal.peak_year|raw}} and averaged {{mal.avg_00_04|f1}} a year in 2000 to 2004. It then fell to {{mal.n_2005|int}} in 2005 and averaged {{mal.avg_06_20|f1}} a year from 2006 to 2020 ({{mal.fall_x|f1}} times lower), never above {{mal.max_06_20|int}}. The fall followed coordinated naval patrols by Indonesia, Malaysia and Singapore from 2004 and joint air patrols from 2005, and the 2004 tsunami, which devastated the Aceh coast \citep{liss}. Indonesia peaked in {{idn.peak_year|raw}} with {{idn.peak_n|int}}. The Indian subcontinent peaked in {{ind.peak_year|raw}} with {{ind.peak_n|int}}; the Chittagong anchorages are the busiest square of the whole record ({{ind.chitt|int}} attacks).
+
+\textbf{2008 to 2011: Somalia.} Attacks in Somali waters rose from {{som.n_2007|int}} in 2007 to {{som.peak_n|int}} in {{som.peak_year|raw}}: {{som.n_08_11|int}} in four years, {{som.pct_world_08_11|pc}} of all attacks. They included {{som.hij_08_11|int}} of the world's {{som.hij_world_08_11|int}} hijackings. {{som.steam_pct_08_11|pc}} were against ships under way and {{som.att_pct_08_11|pc}} were attempts that failed. Their spread across the Gulf of Aden, the Somali Basin and the Arabian Sea means that only two Gulf of Aden squares appear among the five busiest of the era. They fell to {{som.n_2012|int}} in 2012, {{som.n_2013|int}} in 2013 and {{som.n_15_20|int}} in all of 2015 to 2020, after international naval patrols, armed security teams on ships, industry best management practices and action against pirate groups ashore \citep{worldbank,bueger,shortland}. From 2014 to 2020 there were {{som.hij_14_20|int}} hijackings in these waters, all in 2017.
+
+\textbf{2012 to 2015: the Singapore Strait.} With fewer than {{sin.avg_93_08|f1}} attacks a year on average to 2008, the Singapore Strait rose to {{sin.peak_n|int}} in {{sin.peak_year|raw}} and led the world in this era ({{sin.n_12_15|int}} attacks). {{sin.boarded_pct_14_15|pc}} of its attacks in 2014 and 2015 were boardings. It fell to {{sin.n_2016|int}} in 2016.
+
+\textbf{2016 to 2020: the Gulf of Guinea.} The Gulf of Guinea and West Africa rose from {{gog.pct_93_99|pc}} of attacks in the 1990s to {{gog.pct_16_20|pc}} in 2016 to 2020, peaking at {{gog.peak_n|int}} in {{gog.peak_year|raw}} with {{gog.n_2020|int}} in 2020 ({{gog.pct_2020|pc}} of the world). The median distance from shore rose from {{gog.kmed_93_15|f1}} km before 2016 to {{gog.kmed_16_20|f1}} km, {{gog.far_16_20|int}} attacks were more than 50 nautical miles out, and {{gog.kidnap_desc_16_20|int}} of the {{gog.n_16_20|int}} IMB narratives mention kidnapping. {{gog.fired_16_20|int}} of the {{gog.fired_world_16_20|int}} ships fired upon in these years were in the region.
+
+\begin{figure}[tbp]\centering\includegraphics[width=\textwidth]{f_eras.png}
+\caption{Attacks by era, counted in hexagons about 4 degrees across (one colour scale for all panels), over the busiest shipping lanes (World Bank and IMF AIS density, 2015 to 2021, smoothed at 1 degree).}\label{fig:eras}\end{figure}
+
+{{TABLE_HOTSPOTS}}
+
+\subsection{What kind of attack}
+{{types.0.pct|pc}} of all attacks were boardings, {{types.3.pct|pc}} attempts, {{types.1.pct|pc}} hijackings ({{hij_total|int}}, peaking at {{hij_peak_n|int}} in {{hij_peak_year|raw}}) and {{types.2.pct|pc1}} ships fired upon (Figure~\ref{fig:types}). Where the ship's state is known, {{anchored_berthed_pct_known|pc}} were at anchor or berthed. Boardings were {{boarded_pct_08_11|pc}} of attacks in 2008 to 2011, when Somali attempts were common, and {{boarded_pct_16_20|pc}} in 2016 to 2020.
+
+\begin{figure}[tbp]\centering\includegraphics[width=\textwidth]{f_types.png}
+\caption{Attack types by era. ``Fired upon'' is recorded almost only from 2015.}\label{fig:types}\end{figure}
+
+\subsection{Distance from shore}
+The median attack was {{km_median|f1}} km from shore and {{within_20_pct|pc}} were within 20 km; ships at anchor were attacked a median {{km_anch_median|f1}} km out and ships under way {{km_steam_median|f1}} km out (Figure~\ref{fig:shore}). Somali waters are the exception: a median {{som.median_km_08_11|int}} km in 2008 to 2011, {{som_km_peak|int}} km in {{som_km_peak_year|raw}}, with {{som.far_pct_08_11|pc}} beyond 100 nautical miles. Of the {{far_n|int}} attacks that far out ({{far_pct|pc1}} of all), {{far_som_pct|pc}} were in Somali waters.
+
+\begin{figure}[tbp]\centering\includegraphics[width=\textwidth]{f_shore.png}
+\caption{Distance from the nearest shore of every attack, with yearly medians for Somali waters (years with five or more attacks) and everywhere else.}\label{fig:shore}\end{figure}
+
+\subsection{Shipping lanes}
+{{ship.top25_pct_attacks|pc}} of attacks fell in the busiest quarter of 1 degree squares with any traffic and {{ship.top10_pct_attacks|pc}} in the busiest tenth; the median attack was in a square at the {{ship.median_pctile|int}}th percentile of traffic (Figure~\ref{fig:ship}). The very busiest 1\%, mostly in the North Sea, the English Channel and around Europe's ports, where terrestrial AIS coverage is densest, had only {{ship.top1_pct_attacks|pc1}} of attacks. Traffic is close to a necessary condition for piracy but far from a sufficient one.
+
+\begin{figure}[tbp]\centering\includegraphics[width=\textwidth]{f_ship.png}
+\caption{Share of attacks (1993 to 2020) by the traffic rank of their 1 degree square (AIS density, 2015 to 2021).}\label{fig:ship}\end{figure}
+
+\subsection{Country context}
+Of {{ind_ctx.with_gdp|int}} attacks inside an EEZ with GDP data (1993 to 2019), {{ind_ctx.below_median_gdp_pct|pc}} were in countries with GDP per person below the world median of that year, and {{ind_ctx.cpi_below35_pct|pc}} of those with a Corruption Perceptions Index score were in countries scoring below 35 of 100 (scores before 2012 multiplied by ten). Across {{ind_ctx.n_countries|int}} countries the rank correlation between total attacks and median GDP per person is {{ind_ctx.rho_gdp|f2}} (Figure~\ref{fig:income}). This is consistent with work linking piracy to weak state capacity and economic opportunity \citep{daxecker,hastings}, but these simple associations cannot separate poverty from geography: many of the busiest straits and anchorages are in lower-income countries.
+
+\begin{figure}[tbp]\centering\includegraphics[width=.8\textwidth]{f_income.png}
+\caption{Attacks in each country's EEZ, 1993 to 2019, against median GDP per person (country indicators from the database). Correlation, not cause.}\label{fig:income}\end{figure}
+
+\subsection{Today: 2021 to 2026}
+The IMB's counts (Table~\ref{tab:imb}, Figure~\ref{fig:today}) show a world total near {{imb.avg_21_25|int}} a year from 2021 to 2025. In 2025 the Singapore Strait recorded {{imb.sin_2025|int}} incidents, {{imb.sin_x_2025|f1}} times its 2024 count and about as many as its mapped peak of {{sin.peak_n|int}} in 2015; it fell to {{imb.sin_q3_2026|int}} in January to September 2026 against {{imb.sin_q3_2025|int}} a year earlier. The Gulf of Guinea had {{imb.gog_2025|int}} incidents in 2025 and {{imb.gog_q3_2026|int}} in the first nine months of 2026, Indonesia {{imb.idn_2025|int}} and {{imb.idn_q3_2026|int}}, and the Philippines {{imb.phl_q3_2026|int}} boardings in 2026. All {{imb.hij_q3_2026|int}} hijackings in January to September 2026 were by Somali pirates, who accounted for {{imb.som_hostage_pct_2026|int}}\% of crew taken hostage: ransom hijacking has returned to Somali waters on a scale not seen since 2012, when the database records {{som.hij_2012|int}} hijackings there.
+
+\begin{figure}[tbp]\centering\includegraphics[width=\textwidth]{f_today.png}
+\caption{IMB headline incident counts, 2023 to January to September 2026, for the world and the regions named in the releases.}\label{fig:today}\end{figure}
+
+{{TABLE_IMB}}
+
+\section{Limitations}
+These are reported attacks. Under-reporting is widespread, especially of thefts from small craft, local vessels and fishing boats, and reporting varies with insurance, port politics and naval presence. The coding changes at 2015, when the source switches from the MAPPING data to IMB reports. Some anchorage attacks share a position copied from earlier incidents. Regions and eras are my own simple choices; other boundaries would shift some counts but not the broad pattern. The shipping layer covers 2015 to 2021, overweights areas with dense terrestrial AIS reception, and is matched to attacks from 1993 onwards. The IMB counts for 2021 to 2026 are headline figures from press releases, not points, and the 2026 figures cover nine months. The country indicators show associations only.
+
+\section{Conclusion}
+Piracy does not disappear; it relocates. Over three decades its centre of gravity moved from the South China Sea and Indonesia to the Strait of Malacca, then to the waters off Somalia, then to the Gulf of Guinea, and in 2025 to the Singapore Strait, with Somali hijacking returning in 2026. Each shift followed changes in enforcement and opportunity on some of the busiest shipping routes in the world.
+
+\section*{Data and code availability}
+The interactive map is at \url{{{meta.page}}}. Data and code are at \url{{{meta.repo}}} and archived with this paper at \url{https://doi.org/{{meta.doi}}}. Derived data are released under CC BY 4.0 and code under the MIT licence. The attack data are CC BY 4.0 \citep{benden}; the shipping density data are CC BY 4.0 \citep{wbships}.
+
+\section*{AI statement}
+I wrote the text, with drafting and editing assistance from Claude (Anthropic), which also helped prepare the analysis code. I reviewed and checked all text and results.
+
+\begin{thebibliography}{9}
+\bibitem[Benden et al.(2021)]{benden} Benden, P., Feng, A., Howell, C. and Dalla Riva, G. V. (2021) Crime at Sea: A Global Database of Maritime Pirate Attacks (1993 to 2020). \emph{Journal of Open Humanities Data} 7: 19. \url{https://doi.org/10.5334/johd.39}. Data: \url{https://github.com/newzealandpaul/Maritime-Pirate-Attacks}
+\bibitem[Bueger(2015)]{bueger} Bueger, C. (2015) Learning from piracy: future challenges of maritime security governance. \emph{Global Affairs} 1(1): 33 to 42.
+\bibitem[Cerdeiro et al.(2020)]{cerdeiro} Cerdeiro, D. A., Komaromi, A., Liu, Y. and Saeed, M. (2020) World Seaborne Trade in Real Time: A Proof of Concept for Building AIS-based Nowcasts from Scratch. IMF Working Paper 20/57.
+\bibitem[Coggins(2012)]{coggins} Coggins, B. L. (2012) Global patterns of maritime piracy, 2000 to 2009: introducing a new dataset. \emph{Journal of Peace Research} 49(4): 605 to 617.
+\bibitem[Daxecker and Prins(2013)]{daxecker} Daxecker, U. and Prins, B. (2013) Insurgents of the sea: institutional and economic opportunities for maritime piracy. \emph{Journal of Conflict Resolution} 57(6): 940 to 965.
+\bibitem[Hastings(2009)]{hastings} Hastings, J. V. (2009) Geographies of state failure and sophistication in maritime piracy hijackings. \emph{Political Geography} 28(4): 213 to 223.
+\bibitem[IMB(2026)]{imb} ICC International Maritime Bureau (2021 to 2026) Piracy and Armed Robbery Against Ships: annual and quarterly reports and press releases. \url{https://www.icc-ccs.org/}; 2026 release: \url{https://iccwbo.org/news-publications/news/maritime-piracy-incidents-remain-at-historic-lows-despite-somali-piracy-concerns/}
+\bibitem[Liss(2011)]{liss} Liss, C. (2011) \emph{Oceans of Crime: Maritime Piracy and Transnational Security in Southeast Asia and Bangladesh}. Singapore: Institute of Southeast Asian Studies.
+\bibitem[NGA(2026)]{asam} US National Geospatial-Intelligence Agency (2026) Anti-Shipping Activity Messages (ASAM). \url{https://msi.nga.mil/}
+\bibitem[Natural Earth(2026)]{naturalearth} Natural Earth (2026) Admin 0 countries and populated places. Public domain. \url{https://www.naturalearthdata.com/}
+\bibitem[Shortland and Vothknecht(2011)]{shortland} Shortland, A. and Vothknecht, M. (2011) Combating ``maritime terrorism'' off the coast of Somalia. \emph{European Journal of Political Economy} 27: S133 to S151.
+\bibitem[World Bank(2013)]{worldbank} World Bank (2013) \emph{The Pirates of Somalia: Ending the Threat, Rebuilding a Nation}. Washington, DC: World Bank.
+\bibitem[World Bank and IMF(2021)]{wbships} World Bank and IMF (2021) Global Shipping Traffic Density. CC BY 4.0. \url{https://datacatalog.worldbank.org/search/dataset/0037580}
+\end{thebibliography}
+\end{document}

@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Piracy Hotspots</title>
+<meta name="description" content="{{n|int}} pirate attacks from 1993 to 2020 mapped year by year, with IMB counts to 2026: how piracy moved from the South China Sea and the Strait of Malacca to Somalia, the Gulf of Guinea and back to the Singapore Strait.">
+<meta property="og:title" content="Piracy hotspots, 1993 to today">
+<meta property="og:description" content="{{n|int}} pirate attacks mapped, 1993 to 2020, and IMB counts to 2026. Somali waters had {{som.peak_n|int}} attacks in {{som.peak_year|raw}}; the Singapore Strait had {{imb.sin_2025|int}} incidents in 2025.">
+<meta property="og:image" content="https://maps.tristanhotham.com/piracy-hotspots/header.png">
+<meta property="og:url" content="https://maps.tristanhotham.com/piracy-hotspots/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800;9..144,900&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+/* Sea chart: pale paper, deep navy ink, signal red for hijackings. */
+:root{
+  --bg:#F6F4EF; --panel:#EAE7DF; --fg:#1D2128; --muted:#636A72; --rule:#DDD8CC; --card:#FFFEFA; --border:#CBC5B8;
+  --hot:#B3202A; --cool:#2F7FB8; --gold:#C9A227; --ink:#173F5F; --land:#E6E2D8; --sea:#E4ECF0;
+  --display:"Fraunces",Georgia,"Times New Roman",serif;
+  --body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11161D; --panel:#1B222C; --fg:#ECEEF1; --muted:#A2A8B0; --rule:#2E3540; --card:#161C24; --border:#444B57;
+  --hot:#FF6B6B; --cool:#7DB7E6; --gold:#F2C94E; --ink:#A9C2E6; --land:#232831; --sea:#131A22; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161D; --panel:#1B222C; --fg:#ECEEF1; --muted:#A2A8B0; --rule:#2E3540; --card:#161C24; --border:#444B57;
+  --hot:#FF6B6B; --cool:#7DB7E6; --gold:#F2C94E; --ink:#A9C2E6; --land:#232831; --sea:#131A22; color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 18px/1.62 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));overflow-x:hidden}
+.wrap{max-width:700px;margin:0 auto;padding-block:28px 64px}
+.wrap .bleed{width:min(1180px,calc(100vw - 32px));margin-left:calc((100% - min(1180px,100vw - 32px))/2);margin-right:0}
+a{color:inherit;text-decoration-color:var(--hot);text-underline-offset:3px}
+.kicker{font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.kicker b{background:var(--ink);color:var(--bg);padding:5px 8px;font-weight:500}
+header.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px 24px;align-items:end;border-bottom:6px double var(--fg);padding-bottom:22px;margin-top:18px}
+h1{font:900 clamp(44px,11vw,94px)/.9 var(--display);letter-spacing:-.02em;margin:0;text-wrap:balance}
+h1 .a{color:var(--hot)} h1 .b{color:var(--cool)}
+.mark{width:clamp(78px,16vw,128px);height:auto;display:block;color:var(--fg)}
+.dek{grid-column:1/-1;font-size:21px;line-height:1.42;margin:8px 0 0;max-width:56ch}
+.byline{font:400 13px/1.4 var(--mono);color:var(--muted);margin-top:14px}
+h2{font:800 34px/1.04 var(--display);letter-spacing:-.01em;margin:54px 0 10px;text-wrap:balance}
+h2 .n{font:500 13px/1 var(--mono);color:var(--hot);display:block;letter-spacing:.1em;margin-bottom:10px}
+h3{font:600 21px/1.25 var(--display);margin:30px 0 6px}
+h3 i.sw{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:8px;vertical-align:0}
+p{margin:0 0 16px}
+.lede::first-letter{font:900 72px/.8 var(--display);float:left;margin:6px 10px 0 0;color:var(--hot)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin:26px 0 8px}
+.stats div{background:var(--card);padding:14px 12px}
+.stats b{display:block;font:900 clamp(22px,4.4vw,32px)/1 var(--display);letter-spacing:-.01em}
+.stats b.h{color:var(--hot)} .stats b.c{color:var(--cool)} .stats b.g{color:var(--gold)} .stats b.p{color:var(--ink)}
+.stats span{font:400 12px/1.35 var(--mono);color:var(--muted);display:block;margin-top:6px}
+@media (max-width:600px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.figure{margin:26px 0 30px}
+.fig-h{font:600 19px/1.25 var(--display);margin:0 0 4px}
+.fig-sub{font:400 13px/1.45 var(--mono);color:var(--muted);margin:0 0 12px}
+.src{font:400 12px/1.45 var(--mono);color:var(--muted);margin-top:10px}
+.chart{width:100%;position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{font-family:var(--mono);fill:var(--fg)}
+.lab{font-size:12px}.halo{paint-order:stroke;stroke:var(--bg);stroke-width:4px;stroke-linejoin:round}.lab.m{fill:var(--muted)}.lab.b{font-weight:500}.lab.s{font-size:11px}
+.tip{position:absolute;pointer-events:none;background:var(--fg);color:var(--bg);font:400 12px/1.45 var(--mono);padding:8px 10px;border-radius:3px;max-width:300px;z-index:100001;transform:translate(-50%,calc(-100% - 12px));display:none}
+.tip b{font-weight:500}
+.controls{display:flex;gap:8px;align-items:center;margin:0 0 10px;flex-wrap:wrap}
+.scrollrow{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;padding-bottom:2px;max-width:100%}
+.scrollrow .btn{flex:0 0 auto;white-space:nowrap}
+.ctl-l{font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:2px;flex:0 0 auto;align-self:center}
+.btn{font:500 12px/1 var(--mono);background:var(--card);color:var(--fg);border:1px solid var(--border);border-radius:3px;padding:8px 10px;cursor:pointer;min-height:36px}
+.btn[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px;border:1px solid rgba(0,0,0,.2)}
+.btn:focus-visible,input:focus-visible,summary:focus-visible,select:focus-visible{outline:2px solid var(--hot);outline-offset:2px}
+.btn.play{background:var(--hot);color:#fff;border-color:var(--hot);min-width:92px}
+select.btn{padding:6px 8px;max-width:100%}
+.searchbox{position:relative;flex:1 1 260px;min-width:0}
+input[type=search]{font:400 15px/1 var(--mono);background:var(--card);color:var(--fg);border:1px solid var(--border);border-radius:3px;padding:10px 11px;min-height:40px;width:100%}
+.suggest{position:absolute;left:0;right:0;top:100%;margin:2px 0 0;padding:0;list-style:none;background:var(--card);border:1px solid var(--border);z-index:1001;font:400 13px/1.3 var(--mono);display:none;max-height:340px;overflow:auto}
+.suggest li{padding:8px 10px;cursor:pointer;border-bottom:1px solid var(--rule)}
+.suggest li span{color:var(--muted)}
+.suggest li[aria-selected="true"],.suggest li:hover{background:var(--panel)}
+.yearbox{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:10px;align-items:center;margin:0 0 10px;font:500 13px/1 var(--mono)}
+.yearbox .yv{font:800 22px/1 var(--display);min-width:4.2ch;text-align:center}
+@media (max-width:600px){.yearbox{grid-template-columns:auto minmax(0,1fr) auto}.yearbox .play{grid-column:1/-1;justify-self:start}}
+.dual{position:relative;height:34px}
+.dual input[type=range]{position:absolute;left:0;right:0;top:4px;width:100%;pointer-events:none;-webkit-appearance:none;appearance:none;background:none;margin:0;height:26px}
+.dual input[type=range]::-webkit-slider-thumb{pointer-events:auto;-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--hot);border:2px solid var(--card);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.dual input[type=range]::-moz-range-thumb{pointer-events:auto;width:18px;height:18px;border-radius:50%;background:var(--hot);border:2px solid var(--card);cursor:pointer}
+.dual .track{position:absolute;left:0;right:0;top:15px;height:4px;background:var(--rule);border-radius:2px}
+.dual .fill{position:absolute;top:15px;height:4px;background:var(--hot);border-radius:2px}
+.mapgrid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;align-items:start}
+@media (max-width:900px){.mapgrid{grid-template-columns:1fr}}
+.side{background:var(--card);border:1px solid var(--border);padding:12px 12px 10px;font:400 13px/1.45 var(--mono);max-height:660px;overflow:auto}
+@media (max-width:900px){.side{max-height:none}}
+.side h4{font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
+.side h4:first-child{margin-top:2px}
+.side .big{font:800 26px/1.1 var(--display);margin:2px 0 4px}
+.side .sub{color:var(--muted);font-size:12px;margin:0 0 8px}
+.side ol,.side ul{margin:4px 0 8px;padding-left:20px}
+.side li{margin:3px 0}
+.side li small,.side td small{color:var(--muted)}
+.side table{width:100%;border-collapse:collapse;margin:4px 0 6px}
+.side td{padding:4px 4px 4px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+.side td.num{text-align:right;white-space:nowrap}
+.side .desc{font:400 13px/1.5 var(--body);background:var(--panel);padding:8px 10px;margin:8px 0}
+.back{font:400 12px var(--mono);background:none;border:0;color:var(--muted);padding:0;cursor:pointer;text-decoration:underline;margin-bottom:6px}
+.go{cursor:pointer;text-decoration:underline;text-decoration-color:var(--border);text-underline-offset:3px}
+.lmap{height:640px;border:1px solid var(--border);background:var(--sea);border-radius:2px}
+@media (max-width:600px){.lmap{height:min(62vh,470px)}}
+.leaflet-container{font:400 12px/1.4 var(--mono);background:var(--sea)}
+.dotcanvas{position:absolute;left:0;top:0;pointer-events:none}
+.lyrBtn{background:var(--card,var(--bg));color:var(--fg);border:1px solid var(--border);border-radius:3px;font:600 12px/1 var(--mono);padding:8px 10px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.lyrBtn[aria-expanded="true"]{background:var(--fg);color:var(--bg)}
+.lyrPanel{background:var(--card,var(--bg));color:var(--fg);border:1px solid var(--border);border-radius:3px;padding:10px 12px 8px;margin-top:6px;width:250px;box-shadow:0 2px 10px rgba(0,0,0,.15);font:400 12px/1.3 var(--mono);max-height:min(70vh,520px);overflow:auto}
+.lyrPanel[hidden]{display:none}
+.lyrPanel .row{margin:0 0 9px}
+.lyrPanel label{display:flex;gap:6px;align-items:center;cursor:pointer;font-weight:600}
+.lyrPanel input[type=range]{width:100%;accent-color:var(--fg)}
+.lyrPanel select{font:400 12px var(--mono);background:var(--bg);color:var(--fg);border:1px solid var(--border);border-radius:2px;padding:2px 4px;width:100%;min-height:0}
+.lyrPanel .sub{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:11px;margin-top:3px}
+.lyrPanel .sub span{flex:0 0 58px}
+.lyrPanel .hd{font:500 10.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 7px;border-top:1px solid var(--rule);padding-top:9px}
+.lyrPanel .reset{font:400 11px var(--mono);color:var(--muted);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline}
+.cityL{font:500 11px/1 var(--mono);color:var(--fg);white-space:nowrap;text-shadow:0 0 3px var(--bg),0 0 3px var(--bg),0 0 2px var(--bg);pointer-events:none}
+.cityL i{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--fg);margin-right:4px;vertical-align:1px}
+.cityL.s{font-size:10px;font-weight:400}
+.cntL{font:700 11px/1 var(--mono);color:var(--fg);white-space:nowrap;text-transform:uppercase;letter-spacing:.06em;opacity:.75;text-shadow:0 0 3px var(--bg),0 0 3px var(--bg);pointer-events:none;text-align:center}
+.boxL{font:600 11px/1.2 var(--mono);color:var(--fg);white-space:nowrap;text-shadow:0 0 3px var(--bg),0 0 3px var(--bg);pointer-events:none}
+.mapnote{background:color-mix(in srgb,var(--card) 92%,transparent);border:1px solid var(--border);border-radius:3px;padding:6px 9px;font:400 12px/1.35 var(--mono);max-width:min(300px,62vw);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.mapnote b{font-weight:600}
+.mapnote:empty{display:none}
+.yearBadge{font:900 44px/1 var(--display);color:var(--fg);text-shadow:0 0 6px var(--bg),0 0 3px var(--bg);pointer-events:none;margin:6px 0 0 4px}
+.yearBadge small{display:block;font:500 12px/1.3 var(--mono);color:var(--fg);margin-top:4px}
+.yearBadge:empty{display:none}
+.leaflet-bar a,.leaflet-bar a:hover{background:var(--card);color:var(--fg);border-bottom-color:var(--border)}
+.leaflet-control-attribution{background:color-mix(in srgb,var(--card) 85%,transparent)!important;color:var(--muted)}
+.leaflet-control-attribution a{color:var(--fg)}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--card);color:var(--fg)}
+.leaflet-popup-content{font:400 12.5px/1.45 var(--mono);margin:10px 12px}
+.leaflet-popup-content b{font:700 15px/1.2 var(--display)}
+.legend{display:flex;gap:6px 14px;flex-wrap:wrap;font:400 12px/1.3 var(--mono);color:var(--muted);margin-top:8px;align-items:center}
+.legend span{display:inline-flex;align-items:center}
+.legend i{display:inline-block;width:13px;height:13px;margin-right:6px;border-radius:50%;border:1px solid rgba(0,0,0,.15)}
+.legend i.sq{border-radius:2px}
+.legend i.hx{border-radius:0;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);border:0;width:15px}
+.legend .ramp{display:inline-block;width:150px;height:12px;border-radius:2px;margin:0 6px;border:1px solid rgba(0,0,0,.1)}
+.pull{font:600 26px/1.25 var(--display);border-left:6px solid var(--hot);padding:4px 0 4px 18px;margin:30px 0}
+.note{background:var(--panel);border:1px solid var(--rule);padding:14px 16px;font-size:16px;margin:22px 0}
+.note h3{margin-top:0}
+table.tbl{width:100%;border-collapse:collapse;font:400 13px/1.4 var(--mono)}
+table.tbl th{font:500 11px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px 6px 6px 0;border-bottom:2px solid var(--fg)}
+table.tbl td{padding:6px 6px 6px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+table.tbl td.r,table.tbl th.r{text-align:right;white-space:nowrap}
+.tablebox{overflow:auto;border:1px solid var(--border);background:var(--card);padding:0 10px}
+.eragrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.eragrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.eragrid{grid-template-columns:1fr}}
+.erabox{background:var(--card);border:1px solid var(--border);padding:10px 10px 6px}
+.erabox h4{font:800 18px/1.1 var(--display);margin:0 0 2px}
+.erabox p{font:400 11.5px/1.35 var(--mono);color:var(--muted);margin:0 0 6px}
+.erabox .row{display:grid;grid-template-columns:minmax(0,1fr) 34px;gap:6px;align-items:center;font:400 12px/1.25 var(--mono);padding:3px 0;cursor:pointer}
+.erabox .row:hover .nm{text-decoration:underline}
+.erabox .bar{height:7px;border-radius:2px;margin-top:3px}
+.erabox .v{text-align:right;font-weight:500}
+.today{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}
+@media (max-width:700px){.today{grid-template-columns:1fr}}
+.today div{background:var(--card);border:1px solid var(--border);border-top:5px solid var(--c,var(--fg));padding:12px}
+.today b{display:block;font:900 30px/1 var(--display);color:var(--c,var(--fg))}
+.today span{display:block;font:400 12px/1.4 var(--mono);color:var(--muted);margin-top:6px}
+.today h4{font:600 16px/1.2 var(--display);margin:0 0 8px}
+details{margin:14px 0}
+summary{font:500 13px/1.4 var(--mono);cursor:pointer;color:var(--fg);padding:8px 0}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+.cta a{font:500 13px/1 var(--mono);text-decoration:none;border:1px solid var(--fg);padding:11px 14px;border-radius:3px}
+.cta a.p{background:var(--hot);border-color:var(--hot);color:#fff}
+footer{border-top:6px double var(--fg);margin-top:56px;padding-top:16px;font:400 13px/1.55 var(--mono);color:var(--muted)}
+footer p{margin:0 0 10px}
+.theme{position:fixed;right:12px;bottom:12px;z-index:1002}
+@media print{.theme,.controls{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="kicker"><b>Data study</b><span>Piracy at sea</span><span>World, 1993 to 2026</span></div>
+<header class="hero">
+  <h1>Pirate <span class="a">hotspots,</span> <span class="b">then and now</span></h1>
+  <svg class="mark" viewBox="0 0 120 120" aria-hidden="true"><g id="heroMark"></g></svg>
+  <p class="dek">Piracy never goes away. It moves. I mapped {{n|int}} attacks on ships from 1993 to 2020 and followed the hotspots as they shifted: from the South China Sea and Indonesia to the Strait of Malacca, then to the Gulf of Aden and the open Indian Ocean, then to the Gulf of Guinea, and, in 2025, back to the Singapore Strait.</p>
+</header>
+<div class="byline">Dr Tristan Hotham · Independent researcher · 2026 · Data: Benden, Feng, Howell and Dalla Riva, Crime at Sea (from IMB and NGA ASAM reports); ICC International Maritime Bureau; World Bank and IMF shipping density; Natural Earth</div>
+
+<div class="stats">
+  <div><b class="p">{{n|int}}</b><span>pirate attacks and attempts mapped, 1993 to 2020</span></div>
+  <div><b class="h">{{som.peak_n|int}}</b><span>attacks in Somali waters and the Gulf of Aden in {{som.peak_year|raw}}, the peak; {{som.n_2013|int}} in 2013</span></div>
+  <div><b class="g">{{gog.pct_2020|pc}}</b><span>of all attacks in 2020 were in the Gulf of Guinea and West Africa</span></div>
+  <div><b class="c">{{imb.sin_2025|int}}</b><span>incidents in the Singapore Strait in 2025, {{imb.sin_pct_2025|pc}} of the world total (IMB)</span></div>
+</div>
+
+<p class="lede">When people picture pirates today they picture Somali skiffs, ladders against the side of a tanker, a ship held for ransom off the Horn of Africa. That was real, and for four years it dominated the world's piracy. But it was one hotspot among several, and it came and went. The Crime at Sea database, built by Benden, Feng, Howell and Dalla Riva from the reports of the International Maritime Bureau and the US National Geospatial-Intelligence Agency, gives a position for {{n|int}} attacks and attempted attacks from 1993 to 2020. Put on a map and played year by year, it shows piracy drifting around the world's shipping lanes like weather.</p>
+<p>The database stops in 2020. To bring the story up to today I add the International Maritime Bureau's own headline counts for 2021 to September 2026. Those are totals and regional counts from its press releases, not mapped points, and I keep them apart on this page.</p>
+
+<h2><span class="n">01 · The map</span>Twenty-eight years of attacks</h2>
+<p>Each dot is one reported attack, coloured by what happened: boarded, hijacked, fired upon, or attempted and fought off. The hexagons show where attacks crowd together in the years you choose. Press play to watch the hotspots move year by year, pick an era, or drag the slider. Click a dot for the record and, from 2015, the IMB's own account.</p>
+<div class="bleed" id="atlas">
+<div class="yearbox"><button class="btn play" id="play" aria-label="Play the years">▶ Play</button><span class="yv" id="y0v">1993</span><div class="dual"><div class="track"></div><div class="fill" id="yfill"></div><input type="range" id="y0" min="1993" max="2020" step="1" value="1993" aria-label="From year"><input type="range" id="y1" min="1993" max="2020" step="1" value="2020" aria-label="To year"></div><span class="yv" id="y1v">2020</span></div>
+<div class="controls"><div class="scrollrow" id="eraRow"><span class="ctl-l">Era</span><button class="btn" data-y="1993,2020">All</button></div></div>
+<div class="controls">
+  <div class="scrollrow" id="viewRow"><span class="ctl-l">Show</span><button class="btn" data-v="both" aria-pressed="true">Dots and hexagons</button><button class="btn" data-v="dots" aria-pressed="false">Dots</button><button class="btn" data-v="hex" aria-pressed="false">Hexagons</button></div>
+  <div class="scrollrow" id="colRow"><span class="ctl-l">Colour</span><button class="btn" data-c="type" aria-pressed="true">Attack type</button><button class="btn" data-c="region" aria-pressed="false">Region</button></div>
+</div>
+<div class="controls"><div class="scrollrow" id="typeRow"><span class="ctl-l">Type</span></div></div>
+<div class="controls">
+  <label class="ctl-l" for="regSel">Region</label><select class="btn" id="regSel" aria-label="Region"></select>
+  <div class="searchbox"><input type="search" id="q" placeholder="Search a ship, a port or a country" aria-label="Search a ship, a port or a country" autocomplete="off"><ul class="suggest" id="sug" role="listbox"></ul></div>
+</div>
+<div class="controls"><div class="scrollrow" id="focusRow"><span class="ctl-l">Zoom to</span></div></div>
+<div class="mapgrid">
+  <div><div id="map" class="lmap" role="application" aria-label="Map of pirate attacks, 1993 to 2020"></div>
+    <div class="legend" id="legend"></div></div>
+  <div class="side" id="side" aria-live="polite"></div>
+</div>
+<p class="src">Dots: {{n|int}} attacks and attempted attacks, 1993 to 2020, from the Crime at Sea database (1993 to 2014 from the MAPPING piracy data, which compiles IMB and NGA ASAM reports; 2015 to 2020 from IMB reports). Positions are as reported; some anchorage attacks share one position. Hexagons count the attacks shown, at the current zoom. "Fired upon" is recorded almost only from 2015. Shipping lanes (under Map layers): World Bank and IMF Global Shipping Traffic Density, AIS 2015 to 2021, summed to 1 degree squares. Outlines: Natural Earth. Base map tiles © Esri.</p>
+</div>
+
+<h2><span class="n">02 · How the hotspots moved</span>From the Malacca Strait to the Gulf of Guinea</h2>
+<p>Reported attacks rose from {{low_n|int}} in {{low_year|raw}} to a peak of {{peak_n|int}} in {{peak_year|raw}}, climbed back above 400 a year from 2009 to 2011 ({{n_2009_11|int}} in three years), and then fell to {{n_2020|int}} in 2020. The International Maritime Bureau's counts since then sit between {{imb.y2022|int}} and {{imb.y2025|int}} a year. But the total hides the real story, which is where the attacks happened.</p>
+<div class="figure"><p class="fig-h">Pirate attacks per year, by region, 1993 to 2026</p><p class="fig-sub">Mapped attacks to 2020, coloured by region. From 2021: IMB headline totals (hatched), which are not split by region here. 2026 is January to September only. Hover a bar.</p>
+<div class="controls"><div class="scrollrow" id="yrMode"><span class="ctl-l">As</span><button class="btn" data-m="n" aria-pressed="true">Attacks</button><button class="btn" data-m="share" aria-pressed="false">Share by region</button></div></div>
+<div class="chart" id="yearChart"></div><div class="legend" id="yearLegend"></div></div>
+
+<h3><i class="sw" style="background:#7A4E9C"></i>The 1990s: the South China Sea and Indonesia</h3>
+<p>In the 1990s piracy was above all an East and Southeast Asian problem. From 1993 to 1999 the South China Sea, the Philippines and East Asian waters saw {{scs.n_93_99|int}} attacks, {{scs.pct_93_99|pc}} of the world's, more than any other region, with ships boarded off Hong Kong, in the Gulf of Thailand and around the Philippines. Indonesia was close behind and overtook it as the decade ended: attacks there peaked at {{idn.peak_n|int}} in {{idn.peak_year|raw}}, many of them robberies of ships at anchor off Jakarta, Balikpapan, Samarinda and Belawan. Across 1993 to 2004 Southeast and East Asian waters, from the Malacca and Singapore straits to the South China Sea and Indonesia, held {{sea93.pct_93_04|pc}} of all reported attacks.</p>
+<h3><i class="sw" style="background:#2A9D8F"></i>The Strait of Malacca falls</h3>
+<p>The Strait of Malacca, the narrow lane between Sumatra and Malaysia that carries much of the trade between Europe, the Gulf and East Asia, peaked at {{mal.peak_n|int}} attacks in {{mal.peak_year|raw}}. From 2000 to 2004 it averaged {{mal.avg_00_04|int}} a year. Then it fell: {{mal.n_2005|int}} in 2005, and an average of {{mal.avg_06_20|int}} a year from 2006 to 2020, with no year above {{mal.max_06_20|int}}. The fall came with coordinated sea patrols by Malaysia, Singapore and Indonesia from 2004 and joint air patrols from 2005, and after the 2004 Indian Ocean tsunami devastated the Aceh coast.</p>
+<h3><i class="sw" style="background:#B3202A"></i>Somalia: the surge and the collapse</h3>
+<p>Then the hotspot jumped west. Attacks in Somali waters, the Gulf of Aden, the southern Red Sea and the Arabian Sea went from {{som.n_2007|int}} in 2007 to {{som.peak_n|int}} in {{som.peak_year|raw}}. Over 2008 to 2011 they were {{som.pct_world_08_11|pc}} of all attacks in the world, and {{som.hij_08_11|int}} of the {{som.hij_world_08_11|int}} hijackings ({{som.hij_pct_world_08_11|pc}}). These were different attacks from the anchorage thefts of Asia: {{som.steam_pct_08_11|pc}} were on ships under way, often far out to sea, and most failed: {{som.att_pct_08_11|pc}} were attempts that did not get on board. Then they collapsed, by {{som.drop_pc_11_13|pc}} between 2011 and 2013, as naval patrols, armed guards, protective measures on ships and action against pirate groups ashore took effect. From 2014 to 2020 the database records only {{som.hij_14_20|int}} hijackings in these waters, all in 2017.</p>
+<h3><i class="sw" style="background:#C9A227"></i>The Gulf of Guinea rises</h3>
+<p>West Africa was never quiet: the anchorages off Lagos are the fourth busiest square in the whole record. But as Somali attacks vanished, the Gulf of Guinea became the world's leading hotspot. It peaked at {{gog.peak_n|int}} attacks in {{gog.peak_year|raw}} and still had {{gog.n_2020|int}} in 2020, {{gog.pct_2020|pc}} of the world's total that year, up from {{gog.pct_93_99|pc}} in the 1990s. The attacks moved further out: the median distance from shore rose from {{gog.kmed_93_15|f1}} km before 2016 to {{gog.kmed_16_20|f1}} km in 2016 to 2020, as gangs from the Niger Delta took crews off ships far offshore and held them for ransom: {{gog.kidnap_desc_16_20|int}} of the {{gog.n_16_20|int}} reports from 2016 to 2020 mention kidnapping. {{gog.fired_16_20|int}} of the {{gog.fired_world_16_20|int}} ships fired upon from 2016 to 2020 were there.</p>
+<h3><i class="sw" style="background:#173F5F"></i>The Singapore Strait comes back</h3>
+<p>The Singapore Strait, the busy channel between Singapore and Indonesia's Batam and Bintan islands, had few attacks before 2008 (about {{sin.avg_93_08|int}} a year). It surged to {{sin.peak_n|int}} in {{sin.peak_year|raw}}; {{sin.boarded_pct_14_15|pc}} of the attacks in 2014 and 2015 were boardings rather than attempts or hijackings. It then dropped to {{sin.n_2016|int}} in 2016. In 2025 the IMB counted {{imb.sin_2025|int}} incidents there, about as many as the 2015 peak and {{imb.sin_pct_2025|pc}} of the world's reported incidents (see section 06).</p>
+
+<div class="figure"><p class="fig-h">The busiest pirate hotspots of each era</p><p class="fig-sub">Attacks in each 1 degree square (about 110 km across), the top five per era, coloured by region. Click a row to see it on the map.</p><div class="eragrid" id="eraGrid"></div></div>
+<p>The single busiest square across all 28 years is the {{top_cell_all.name|raw}}, with {{top_cell_all.n|int}} attacks, most of them thefts from ships waiting at anchor. The twenty busiest squares, out of {{cells_all|int}} with any attack, hold {{top20_cells_pct|pc}} of all attacks. The Somali attacks are the exception: they were spread across an ocean, so even at their peak only two Gulf of Aden squares reach the top five.</p>
+
+<h2><span class="n">03 · What kind of attack</span>Mostly theft, sometimes hijacking</h2>
+<p>Most piracy is not dramatic. {{types.0.pct|pc}} of all the attacks were boardings, usually by a few robbers who climb aboard, take whatever they can carry, and leave. {{types.3.pct|pc}} were attempts fought off or abandoned. Hijackings, where the attackers take control of the ship, were {{types.1.pct|pc}} ({{hij_total|int}}), peaking at {{hij_peak_n|int}} in {{hij_peak_year|raw}}. Of the attacks where the ship's state is known, {{anchored_berthed_pct_known|pc}} were on ships at anchor or alongside a berth.</p>
+<div class="figure"><p class="fig-h">Attack types by era</p><p class="fig-sub">Share of attacks in each era. "Fired upon" is recorded almost only from 2015, when the database switches to IMB reports; before that, ships fired upon but not boarded are mostly counted as attempted. 1993's {{n_1993_untyped|int}} attacks have no type. Hover a bar.</p><div class="chart" id="typeChart"></div><div class="legend" id="typeLegend"></div></div>
+
+<h2><span class="n">04 · How far from shore</span>Far out at sea, or close in at anchor</h2>
+<p>Half of all attacks happened within {{km_median|f1}} km of land, and {{within_20_pct|pc}} within 20 km. Ships at anchor were attacked a median {{km_anch_median|f1}} km from shore. The Somali attacks broke that pattern. With motherships towing skiffs, Somali pirates hunted ships hundreds of kilometres out: the median distance of attacks in these waters was {{som.median_km_08_11|int}} km in 2008 to 2011, reaching {{som_km_peak|int}} km in {{som_km_peak_year|raw}}, and {{som.far_pct_08_11|pc}} were more than 100 nautical miles (185 km) from land. Of all the attacks that far out, {{far_som_pct|pc}} were in Somali waters.</p>
+<div class="figure"><p class="fig-h">Distance from the nearest shore, every attack, 1993 to 2020</p><p class="fig-sub">Each dot is one attack (log scale). Red: Somali coast, Gulf of Aden, Red Sea and Arabian Sea. Lines: median per year for those waters (red, years with five or more attacks) and for everywhere else (dark). Hover a dot.</p><div class="chart" id="kmChart"></div><div class="legend" id="kmLegend"></div></div>
+
+<h2><span class="n">05 · Busy lanes</span>Where the ships are</h2>
+<p>Pirates go where the ships are, and where ships slow down or wait. Using the World Bank and IMF map of ship traffic from satellite and coastal AIS signals, summed to 1 degree squares, {{ship.top25_pct_attacks|pc}} of attacks were in the busiest quarter of squares with any traffic, and {{ship.top10_pct_attacks|pc}} in the busiest tenth. But traffic alone does not make a hotspot. The very busiest 1% of squares, in the North Sea, the English Channel and the Baltic approaches, saw only {{ship.top1_pct_attacks|pc1}} of attacks. Turn on "Shipping lanes" under Map layers to compare.</p>
+<div class="figure"><p class="fig-h">Attacks by how busy the sea is</p><p class="fig-sub">1 degree squares with any ship traffic, ranked by AIS traffic density (2015 to 2021), against the share of all attacks (1993 to 2020) that fell in them.</p><div class="chart" id="shipChart"></div></div>
+<p>The country indicators that come with the database tell a familiar story, with all the usual caution. {{ind_ctx.below_median_gdp_pct|pc}} of attacks inside a country's waters were in countries whose income per person was below the world median that year, and {{ind_ctx.cpi_below35_pct|pc}} in countries scoring under 35 out of 100 on the Corruption Perceptions Index. That is a correlation, not a cause: poorer countries also have many of the world's busiest anchorages and straits.</p>
+
+<h2><span class="n">06 · Today</span>Where piracy happens now</h2>
+<p>The mapped data end in 2020. For 2021 to 2026 I use the International Maritime Bureau's published headline counts. They are counts of reported incidents, not positions, and they are not directly comparable with the mapped series, though the database itself was built largely from IMB reports.</p>
+<div class="today">
+  <div style="--c:#173F5F"><h4>Singapore Strait</h4><b>{{imb.sin_2025|int}}</b><span>incidents in 2025, up from {{imb.sin_2024|int}} in 2024 and {{imb.sin_pct_2025|pc}} of the world's {{imb.y2025|int}}. Falling back in 2026: {{imb.sin_q3_2026|int}} in January to September, against {{imb.sin_q3_2025|int}} a year earlier.</span></div>
+  <div style="--c:#B3202A"><h4>Somalia</h4><b>{{imb.hij_q3_2026|int}}</b><span>hijackings worldwide in January to September 2026, all by Somali pirates, who took {{imb.som_hostage_pct_2026|int}}% of all crew held hostage. In the mapped data there were {{som.hij_14_20|int}} Somali hijackings from 2014 to 2020.</span></div>
+  <div style="--c:#C9A227"><h4>Gulf of Guinea</h4><b>{{imb.gog_2025|int}}</b><span>incidents in 2025 ({{imb.gog_2024|int}} in 2024), far below the {{gog.peak_n|int}} mapped in {{gog.peak_year|raw}}, and {{imb.gog_q3_2026|int}} in January to September 2026. Kidnappings of crew still happen: {{imb.kidnap_2025|int}} crew were kidnapped worldwide in 2025.</span></div>
+</div>
+<p>Worldwide, the IMB counted {{imb.y2021|int}} incidents in 2021 and {{imb.y2022|int}} in 2022, the lowest for three decades, then {{imb.y2023|int}}, {{imb.y2024|int}} and {{imb.y2025|int}}. In January to September 2026 it counted {{imb.q3_2026|int}}, {{imb.q3_drop_pc|pc}} fewer than the {{imb.q3_2025|int}} of the same months in 2025, mostly because the Singapore Strait went quiet. Indonesia had {{imb.idn_2025|int}} incidents in 2025 and {{imb.idn_q3_2026|int}} in the first nine months of 2026, and the Philippines {{imb.phl_q3_2026|int}} boardings. So in 2026 the picture is two hotspots of very different kinds: petty theft in the busiest strait in the world, and the return of ransom hijacking off Somalia.</p>
+<div class="figure"><p class="fig-h">Headline counts, 2021 to September 2026</p><p class="fig-sub">IMB reported incidents: world total and the regions the press releases name. Blank where a release does not give a number. Hover a bar.</p><div class="chart" id="todayChart"></div><div class="legend" id="todayLegend"></div></div>
+<details><summary>IMB sources for 2021 to 2026</summary><div class="tablebox"><table class="tbl" id="imbTable"></table></div></details>
+<p class="pull">Piracy never goes away. It moves to wherever ships slow down, the law is thin and somebody will pay.</p>
+
+<h2><span class="n">07 · How I did this</span>Methods and caveats</h2>
+<p><b>The attacks.</b> The Crime at Sea database (Benden, Feng, Howell and Dalla Riva, 2021) gives {{n|int}} attacks from 1993 to 2020 with a date, position, attack type, the ship's state (anchored, berthed or steaming), the nearest country and its exclusive economic zone, and the distance to shore. Attacks from 1993 to 2014 ({{src_mapping|int}}) come from the MAPPING piracy data compiled by Brandon Prins from IMB and NGA ASAM reports; those from 2015 to 2020 ({{src_imb|int}}) come straight from IMB reports and include their text. I merged "Boarding" and "Boarded", which the source uses in alternate years for the same thing, and kept the positions as given.</p>
+<p><b>Regions</b> are simple geography: the Singapore Strait is a box from 103.4°E to 104.65°E and 0.85°N to 1.6°N (including the Batam and Bintan anchorages); the Strait of Malacca a polygon from the Andaman Sea to Singapore; then Indonesian waters, the South China Sea and East Asia, the Indian subcontinent (within 300 km of its coast), the East African coast (within 60 km of Kenya to South Africa), Somali waters (everything else between 32°E and 80°E, 15°S and 30°N, outside the Persian Gulf), West Africa (30°W to 16°E, 20°S to 20°N) and the Americas. <b>Hotspots</b> are 1 degree squares. <b>Shipping</b> comes from the subsampled overview of the World Bank and IMF density raster, so I only use it summed to 1 degree.</p>
+<p><b>What this is not.</b> These are reported attacks. Many are never reported, especially thefts from small and local craft and attacks on fishing boats; reporting also changes with insurance, politics and who is watching. The 1993 to 2014 records and the 2015 to 2020 records were coded by different people, so small shifts at 2015, such as "fired upon", are partly coding. The IMB counts for 2021 to 2026 are headline numbers from press releases, not mapped points.</p>
+<details><summary>Sources and licences</summary>
+<ul>
+<li>Benden, P., Feng, A., Howell, C. and Dalla Riva, G. V. (2021) Crime at Sea: A Global Database of Maritime Pirate Attacks (1993 to 2020). Journal of Open Humanities Data 7: 19. <a href="https://doi.org/10.5334/johd.39">doi:10.5334/johd.39</a>. Data from <a href="https://github.com/newzealandpaul/Maritime-Pirate-Attacks">github.com/newzealandpaul/Maritime-Pirate-Attacks</a>, CC BY 4.0. Built from IMB Piracy Reporting Centre reports and NGA Anti-Shipping Activity Messages, with the MAPPING piracy data of Brandon Prins.</li>
+<li>ICC International Maritime Bureau, Piracy and Armed Robbery Against Ships reports and press releases, 2021 to 2026 (headline counts only; sources listed above).</li>
+<li>World Bank and IMF, Global Shipping Traffic Density (AIS, 2015 to 2021), CC BY 4.0, <a href="https://datacatalog.worldbank.org/search/dataset/0037580">World Bank Data Catalog</a>.</li>
+<li>Natural Earth countries and populated places (public domain). Base map tiles © Esri.</li>
+</ul></details>
+
+<div class="cta"><a class="p" href="https://doi.org/10.5281/zenodo.23856383">Read the paper</a><a href="https://github.com/Tristan-Hotham/piracy-hotspots">Data and code</a><a href="https://blog.tristanhotham.com/2026/10/31/piracy-hotspots/">Blog post</a></div>
+
+<footer>
+<p>Dr Tristan Hotham, Independent researcher. ORCID <a href="https://orcid.org/0000-0003-4931-9349">0000-0003-4931-9349</a>.</p>
+<p>Cite as: Hotham, T. (2026) Pirate hotspots, then and now: how maritime piracy moved around the world, 1993 to 2026. Zenodo. <a href="https://doi.org/10.5281/zenodo.23856383">https://doi.org/10.5281/zenodo.23856383</a></p>
+<p>Data: Benden et al. (2021), CC BY 4.0; ICC International Maritime Bureau (headline counts); World Bank and IMF (CC BY 4.0); Natural Earth. Licence: text, figures and derived data CC BY 4.0, code MIT.</p>
+<p>I wrote the text, with drafting and editing assistance from Claude (Anthropic), which also helped prepare the analysis code. I reviewed and checked all text and results.</p>
+</footer>
+</div>
+<div class="tip" id="tip"></div>
+<button class="btn theme" id="theme" aria-label="Toggle dark mode">◐</button>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const R = /*RESULTS*/;
+const SITE = /*SITE*/;
+const WORLD = /*WORLD*/;
+const CITIES = /*CITIES*/;
+const fmt = n => n == null || n === "" ? "n/a" : Math.round(n).toLocaleString("en-GB");
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const tip = document.getElementById("tip");
+function showTip(h, x, y) { tip.innerHTML = h; tip.style.display = "block"; const w = tip.offsetWidth; x = Math.max(w / 2 + 8, Math.min(innerWidth - w / 2 - 8, x)); tip.style.left = x + scrollX + "px"; tip.style.top = y + scrollY + "px"; }
+function hideTip() { tip.style.display = "none"; }
+document.addEventListener("click", hideTip);
+const NS = "http://www.w3.org/2000/svg";
+const el = (t, a, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+const lbl = (svg, x, y, s, cls = "lab", anchor = "start") => { const t = el("text", { x, y, class: cls, "text-anchor": anchor }, svg); t.textContent = s; return t; };
+const redraws = [];
+function resp(box, render) { let last = 0; const go = force => { const w = Math.max(280, Math.round(box.clientWidth)); if (!force && Math.abs(w - last) < 4) return; last = w; box.innerHTML = ""; render(w, w < 560); }; new ResizeObserver(() => go()).observe(box); go(); redraws.push(() => go(true)); return () => go(true); }
+const isDark = () => { const r = document.documentElement; return r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; };
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const small = () => innerWidth < 900;
+const TYPES = SITE.types, REGIONS = SITE.regions, RSHORT = SITE.rshort, ERAS = SITE.eras, STATUS = SITE.status;
+const Y0 = 1993, Y1 = 2020;
+
+/* hero mark: a skiff's grappling ladder against a hull */
+(function () {
+  const g = document.getElementById("heroMark");
+  el("path", { d: "M6 92 Q24 86 42 92 T78 92 T114 92", fill: "none", stroke: "#2F7FB8", "stroke-width": 3 }, g);
+  el("path", { d: "M6 104 Q24 98 42 104 T78 104", fill: "none", stroke: "#2F7FB8", "stroke-width": 2, opacity: .5 }, g);
+  el("path", { d: "M60 88 L66 30 L116 30 L116 88 Z", fill: "#173F5F", stroke: "currentColor", "stroke-width": 2.4, "stroke-linejoin": "round" }, g);
+  el("path", { d: "M70 40 L112 40", stroke: "#F6F4EF", "stroke-width": 2, opacity: .5 }, g);
+  el("path", { d: "M10 84 L48 84 L42 92 L16 92 Z", fill: "#B3202A", stroke: "currentColor", "stroke-width": 2.2, "stroke-linejoin": "round" }, g);
+  el("path", { d: "M40 84 L62 26 M48 86 L68 30", stroke: "currentColor", "stroke-width": 2.2, "stroke-linecap": "round" }, g);
+  for (let k = 0; k < 6; k++) { const t = .12 + k * .15; el("path", { d: `M${40 + 22 * t} ${84 - 58 * t} L${48 + 20 * t} ${86 - 56 * t}`, stroke: "currentColor", "stroke-width": 2 }, g); }
+  el("path", { d: "M62 26 l-6 -6 M62 26 l2 -8 M62 26 l7 -4", stroke: "currentColor", "stroke-width": 2.2, "stroke-linecap": "round" }, g);
+})();
+
+/* ---------- map machinery ---------- */
+const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/";
+const ESRI_ATT = 'Tiles &copy; Esri, GEBCO, NOAA, National Geographic, Garmin, HERE, Geonames.org, and other contributors';
+const LYDEF = { base: "ocean", hills: false, hillK: 40, labels: true, labelK: 70, names: true, nameLvl: 1, cnames: false, borders: true, ship: false, shipK: 60, outlines: false, size: 2.5, hex: 16, hexK: 70 };
+const LY = { ...LYDEF };
+try { Object.assign(LY, JSON.parse(localStorage.getItem("pir_layers") || "{}")); } catch (e) {}
+const saveLY = () => { try { localStorage.setItem("pir_layers", JSON.stringify(LY)); } catch (e) {} };
+const HOME = () => small() ? [[8, 70], 1.5] : [[10, 55], 2];
+const map = L.map("map", { minZoom: 1, maxZoom: 14, maxBounds: [[-80, -220], [85, 220]], zoomSnap: .5, worldCopyJump: false }).setView(...HOME());
+["hills:250", "fill:400", "labels:450", "pts:600", "names:620"].forEach(s => { const [n, z] = s.split(":"); map.createPane(n); map.getPane(n).style.zIndex = z; });
+["hills", "labels", "names", "pts", "fill"].forEach(n => map.getPane(n).style.pointerEvents = "none");
+let base = null, hills = null, labels = null; const names = L.layerGroup(), cnames = L.layerGroup(), outlines = L.layerGroup();
+function setTiles() {
+  [base, labels, hills].forEach(l => { if (l) map.removeLayer(l); });
+  const t = isDark() ? "Dark" : "Light";
+  const url = LY.base === "ocean" ? ESRI + "Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}" : LY.base === "relief" ? ESRI + "World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}" : LY.base === "satellite" ? ESRI + "World_Imagery/MapServer/tile/{z}/{y}/{x}" : `${ESRI}Canvas/World_${t}_Gray_Base/MapServer/tile/{z}/{y}/{x}`;
+  base = L.tileLayer(url, { maxZoom: 16, maxNativeZoom: LY.base === "relief" || LY.base === "ocean" ? 13 : 16, attribution: ESRI_ATT }).addTo(map);
+  hills = L.tileLayer(ESRI + "Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}", { maxZoom: 16, maxNativeZoom: 16, pane: "hills" });
+  labels = L.tileLayer(LY.base === "ocean" ? ESRI + "Ocean/World_Ocean_Reference/MapServer/tile/{z}/{y}/{x}" : `${ESRI}Canvas/World_${t}_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, { maxZoom: 16, maxNativeZoom: 13, pane: "labels" });
+  applyLayers();
+}
+function applyLayers() {
+  if (!base) return;
+  if (LY.hills) { hills.addTo(map); hills.setOpacity(Math.min(1, .1 + LY.hillK / 120)); } else map.removeLayer(hills);
+  if (LY.labels) { labels.addTo(map); labels.setOpacity(LY.labelK / 100); } else map.removeLayer(labels);
+  if (LY.names) names.addTo(map); else map.removeLayer(names);
+  if (LY.cnames) cnames.addTo(map); else map.removeLayer(cnames);
+  if (LY.outlines) outlines.addTo(map); else map.removeLayer(outlines);
+  if (LY.ship && !SHIP) loadShip();
+  cLayer.setStyle(cStyle); placeNames(); dots.draw();
+}
+function placeNames() {
+  names.clearLayers(); cnames.clearLayers();
+  const z = map.getZoom(), bb = map.getBounds().pad(.05); const bxs = [];
+  if (LY.names) {
+    const minPop = [[2, 8e6], [3, 3e6], [4, 1e6], [5, 4e5], [6, 1.5e5], [7, 6e4], [99, 2e4]].find(([zz]) => z < zz + (LY.nameLvl === 2 ? 1.5 : LY.nameLvl === 0 ? -1 : 0))[1] * (LY.nameLvl === 0 ? 2 : 1);
+    let n = 0;
+    for (const c of CITIES) {
+      if (c.pop < minPop || !bb.contains([c.lat, c.lon])) continue;
+      const pt = map.latLngToContainerPoint([c.lat, c.lon]), big = c.pop >= 5e6;
+      const bx = [pt.x - 4, pt.y - 8, pt.x + 10 + c.name.length * (big ? 6.9 : 6.3), pt.y + 7];
+      if (bxs.some(o => bx[0] < o[2] && bx[2] > o[0] && bx[1] < o[3] && bx[3] > o[1])) continue;
+      bxs.push(bx); L.marker([c.lat, c.lon], { pane: "names", interactive: false, keyboard: false, icon: L.divIcon({ className: "cityL" + (big ? "" : " s"), html: `<i></i>${esc(c.name)}`, iconSize: null, iconAnchor: [3, 6] }) }).addTo(names);
+      if (++n >= 120) break;
+    }
+  }
+  if (LY.cnames && z >= 3 && z < 7) {
+    WORLD.features.forEach(f => { const g = SITE.cpos[f.properties.iso]; if (!g || !bb.contains([g[1], g[0]])) return; const nm = SITE.cname[f.properties.iso] || "";
+      if (z < 4 && (g[2] || 0) < 2e7) return; const pt = map.latLngToContainerPoint([g[1], g[0]]), w = nm.length * 7.2;
+      const bx = [pt.x - w / 2, pt.y - 7, pt.x + w / 2, pt.y + 7]; if (bxs.some(o => bx[0] < o[2] && bx[2] > o[0] && bx[1] < o[3] && bx[3] > o[1])) return; bxs.push(bx);
+      L.marker([g[1], g[0]], { pane: "names", interactive: false, keyboard: false, icon: L.divIcon({ className: "cntL", html: esc(nm), iconSize: [w, 14], iconAnchor: [w / 2, 7] }) }).addTo(cnames); });
+  }
+}
+(function layerControl() {
+  const Ctl = L.Control.extend({ options: { position: "topright" }, onAdd() {
+    const d = L.DomUtil.create("div"); L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d);
+    d.innerHTML = `<button class="lyrBtn" aria-expanded="false">Map layers</button>
+<div class="lyrPanel" hidden>
+ <div class="row"><label style="font-weight:600">Base map</label><div class="sub"><select data-k="base" aria-label="Base map"><option value="ocean">Sea depth (bathymetry)</option><option value="plain">Plain grey</option><option value="relief">Shaded relief</option><option value="satellite">Satellite</option></select></div></div>
+ <div class="row"><label><input type="checkbox" data-k="hills"> Hill shading</label><div class="sub"><span>strength</span><input type="range" data-k="hillK" min="10" max="100" step="5" aria-label="Hill shading strength"></div></div>
+ <div class="row"><label><input type="checkbox" data-k="labels"> Sea and place labels</label><div class="sub"><span>strength</span><input type="range" data-k="labelK" min="20" max="100" step="5" aria-label="Map label strength"></div></div>
+ <div class="row"><label><input type="checkbox" data-k="names"> Bold town names</label><div class="sub"><span>how many</span><select data-k="nameLvl" aria-label="How many town names"><option value="0">Biggest only</option><option value="1">Some</option><option value="2">Lots</option></select></div></div>
+ <div class="row"><label><input type="checkbox" data-k="cnames"> Country names</label></div>
+ <div class="row"><label><input type="checkbox" data-k="borders"> Borders</label></div>
+ <div class="hd">Study layers</div>
+ <div class="row"><label><input type="checkbox" data-k="ship"> Shipping lanes (AIS)</label><div class="sub"><span>strength</span><input type="range" data-k="shipK" min="20" max="100" step="5" aria-label="Shipping lanes strength"></div></div>
+ <div class="row"><label><input type="checkbox" data-k="outlines"> Malacca and Singapore outlines</label></div>
+ <div class="row"><label style="font-weight:600">Dot size</label><div class="sub"><span>size</span><input type="range" data-k="size" min="1" max="6" step=".5" aria-label="Dot size"></div></div>
+ <div class="row"><label style="font-weight:600">Hexagons</label><div class="sub"><span>size</span><input type="range" data-k="hex" min="8" max="34" step="2" aria-label="Hexagon size"></div><div class="sub"><span>strength</span><input type="range" data-k="hexK" min="20" max="100" step="5" aria-label="Hexagon strength"></div></div>
+ <button class="reset">Reset layers</button>
+</div>`;
+    return d; } });
+  map.addControl(new Ctl());
+  const box = map.getContainer(), btn = box.querySelector(".lyrBtn"), pan = box.querySelector(".lyrPanel");
+  btn.onclick = () => { const o = pan.hidden; pan.hidden = !o; btn.setAttribute("aria-expanded", o); };
+  const sync = () => pan.querySelectorAll("[data-k]").forEach(i => { const k = i.dataset.k; if (i.type === "checkbox") i.checked = LY[k]; else i.value = LY[k]; });
+  pan.querySelectorAll("[data-k]").forEach(i => i.addEventListener(i.type === "range" ? "input" : "change", () => {
+    const k = i.dataset.k; LY[k] = i.type === "checkbox" ? i.checked : (k === "base" ? i.value : +i.value);
+    if (k === "hillK") LY.hills = true; if (k === "labelK") LY.labels = true; if (k === "nameLvl") LY.names = true; if (k === "shipK") LY.ship = true;
+    sync(); saveLY(); if (k === "base") setTiles(); else applyLayers(); legend();
+  }));
+  pan.querySelector(".reset").onclick = () => { Object.assign(LY, LYDEF); saveLY(); sync(); setTiles(); legend(); };
+  sync();
+})();
+const Badge = L.Control.extend({ options: { position: "topleft" }, onAdd() { const d = L.DomUtil.create("div", "yearBadge"); d.id = "badge"; return d; } });
+map.addControl(new Badge());
+const Note = L.Control.extend({ options: { position: "bottomleft" }, onAdd() { const d = L.DomUtil.create("div", "mapnote"); d.id = "mapnote"; L.DomEvent.disableClickPropagation(d); return d; } });
+map.addControl(new Note());
+L.control.scale({ imperial: false, position: "bottomright" }).addTo(map);
+L.polygon(SITE.malacca.map(([x, y]) => [y, x]), { pane: "fill", color: "#2A9D8F", weight: 1.6, dashArray: "5 4", fill: false, interactive: false }).addTo(outlines);
+L.marker([6.6, 95.6], { pane: "names", interactive: false, icon: L.divIcon({ className: "boxL", html: "Strait of Malacca", iconSize: null, iconAnchor: [0, 16] }) }).addTo(outlines);
+(function () { const [a, b, c, d] = SITE.singapore; L.rectangle([[b, a], [d, c]], { pane: "fill", color: "#173F5F", weight: 1.6, dashArray: "5 4", fill: false, interactive: false }).addTo(outlines);
+  L.marker([d, c], { pane: "names", interactive: false, icon: L.divIcon({ className: "boxL", html: "Singapore Strait", iconSize: null, iconAnchor: [-4, 14] }) }).addTo(outlines); })();
+
+/* ---------- state ---------- */
+const S = { col: "type", view: "both", y0: Y0, y1: Y1, type: new Set(TYPES.map((t, i) => i)), reg: -1, met: null, playing: false };
+function cStyle() { return { color: css("--border") || "#999", weight: LY.borders ? .6 : 0, fillColor: css("--land"), fillOpacity: 0, interactive: false }; }
+const cLayer = L.geoJSON(WORLD, { pane: "fill", style: cStyle, interactive: false }).addTo(map);
+
+/* ---------- shipping lanes, hexagons and dots on one canvas ---------- */
+let P = null, DET = null, SHIP = null, Z = -1, XY = null, VIS = new Int32Array(0), NV = 0, CNT = null, HEX = null;
+const keep = p => S.type.has(p[3]) && (S.reg < 0 || p[4] === S.reg) && p[2] >= S.y0 && p[2] <= S.y1;
+const colOf = p => S.col === "region" ? REGIONS[p[4]][1] : TYPES[p[3]][1];
+const SHIPC = [null, [200, 214, 222], [168, 192, 206], [130, 165, 188], [96, 138, 170], [66, 110, 150], [40, 82, 128], [20, 58, 104]];
+const HEXR = [[255, 240, 196], [253, 196, 110], [240, 128, 56], [200, 60, 40], [130, 18, 44], [60, 8, 40]];
+function loadShip() { fetch("data/shipping.json").then(r => r.json()).then(j => { SHIP = j.cells; dots.draw(); }); }
+const Dots = L.Layer.extend({
+  onAdd(m) { this._c = L.DomUtil.create("canvas", "dotcanvas"); m.getPane("pts").appendChild(this._c); m.on("moveend zoomend resize viewreset", this._reset, this); m.on("zoomstart", () => this._c.style.opacity = 0); this._reset(); },
+  onRemove(m) { L.DomUtil.remove(this._c); m.off("moveend zoomend resize viewreset", this._reset, this); },
+  _reset() { const s = map.getSize(), d = devicePixelRatio || 1; L.DomUtil.setPosition(this._c, map.containerPointToLayerPoint([0, 0])); this._c.width = s.x * d; this._c.height = s.y * d; this._c.style.width = s.x + "px"; this._c.style.height = s.y + "px"; this._c.style.opacity = 1; this.draw(); },
+  draw() {
+    if (!this._c) return; const ctx = this._c.getContext("2d"), d = devicePixelRatio || 1; ctx.setTransform(d, 0, 0, d, 0, 0); ctx.clearRect(0, 0, this._c.width, this._c.height); NV = 0; HEX = null;
+    const z = map.getZoom(), sz = map.getSize(), dark = isDark();
+    if (LY.ship && SHIP) {
+      ctx.globalAlpha = LY.shipK / 100;
+      for (const [la, lo, k] of SHIP) { const a = map.latLngToContainerPoint([la + 1, lo]), b = map.latLngToContainerPoint([la, lo + 1]);
+        if (b.x < 0 || a.x > sz.x || b.y < 0 || a.y > sz.y) continue; const c = SHIPC[k]; ctx.fillStyle = dark ? `rgb(${c.map(v => 255 - v * .75).join(",")})` : `rgb(${c})`; ctx.fillRect(a.x, a.y, b.x - a.x + .5, b.y - a.y + .5); }
+      ctx.globalAlpha = 1;
+    }
+    if (!P) return;
+    if (z !== Z) { Z = z; XY = new Float32Array(P.length * 2); P.forEach((p, i) => { const q = map.project([p[0], p[1]], z); XY[2 * i] = q.x; XY[2 * i + 1] = q.y; }); VIS = new Int32Array(P.length); }
+    const o = map.getPixelOrigin(), off = map.containerPointToLayerPoint([0, 0]), ox = o.x + off.x, oy = o.y + off.y;
+    CNT = { n: 0, t: TYPES.map(() => 0), r: REGIONS.map(() => 0) };
+    for (let i = 0; i < P.length; i++) {
+      const p = P[i]; if (!keep(p)) continue;
+      CNT.n++; CNT.t[p[3]]++; CNT.r[p[4]]++;
+      const x = XY[2 * i] - ox, yy = XY[2 * i + 1] - oy; if (x < -40 || yy < -40 || x > sz.x + 40 || yy > sz.y + 40) continue;
+      VIS[NV++] = i;
+    }
+    if (S.view !== "dots") {   // pointy-top hexagons in screen space
+      const r = LY.hex, w = Math.sqrt(3) * r, H = new Map();
+      for (let k = 0; k < NV; k++) { const i = VIS[k], x = XY[2 * i] - ox, yy = XY[2 * i + 1] - oy;
+        let q = (Math.sqrt(3) / 3 * x - yy / 3) / r, rr = (2 / 3 * yy) / r, s = -q - rr; let rq = Math.round(q), rr2 = Math.round(rr), rs = Math.round(s);
+        const dq = Math.abs(rq - q), dr = Math.abs(rr2 - rr), ds = Math.abs(rs - s); if (dq > dr && dq > ds) rq = -rr2 - rs; else if (dr > ds) rr2 = -rq - rs;
+        const key = rq + "," + rr2; let h = H.get(key); if (!h) { h = { q: rq, r: rr2, n: 0, t: TYPES.map(() => 0) }; H.set(key, h); } h.n++; h.t[P[i][3]]++; }
+      let mx = 4; for (const h of H.values()) if (h.n > mx) mx = h.n;
+      HEX = { H, r, mx };
+      const al = LY.hexK / 100 * (S.view === "both" ? .8 : 1);
+      for (const h of H.values()) { const cx = w * (h.q + h.r / 2), cy = 1.5 * r * h.r, t = Math.log(1 + h.n) / Math.log(1 + mx), s = t * (HEXR.length - 1), a = Math.min(HEXR.length - 2, Math.floor(s)), u = s - a, c = HEXR[a].map((x, j) => Math.round(x + (HEXR[a + 1][j] - x) * u));
+        ctx.beginPath(); for (let k = 0; k < 6; k++) { const an = Math.PI / 180 * (60 * k - 30); ctx.lineTo(cx + (r - .6) * Math.cos(an), cy + (r - .6) * Math.sin(an)); } ctx.closePath();
+        ctx.fillStyle = `rgba(${c},${al * (.45 + .55 * t)})`; ctx.fill(); }
+    }
+    if (S.view !== "hex") {
+      const r0 = LY.size * (z < 3 ? .8 : z < 5 ? 1 : z < 7 ? 1.3 : 1.7) * (S.view === "both" ? .9 : 1);
+      ctx.lineWidth = .6; ctx.strokeStyle = dark ? "rgba(0,0,0,.7)" : "rgba(255,255,255,.9)";
+      const order = []; for (let k = 0; k < NV; k++) order.push(VIS[k]);
+      order.sort((a, b) => (P[a][3] === 1) - (P[b][3] === 1));   // hijackings on top
+      for (const i of order) { const p = P[i]; ctx.beginPath(); ctx.arc(XY[2 * i] - ox, XY[2 * i + 1] - oy, p[3] === 1 ? r0 * 1.35 : r0, 0, 7); ctx.fillStyle = colOf(p); ctx.globalAlpha = .9; ctx.fill(); ctx.globalAlpha = 1; if (r0 >= 1.8) ctx.stroke(); }
+    }
+    if (S.met != null) { const i = S.met; const x = XY[2 * i] - ox, yy = XY[2 * i + 1] - oy; ctx.beginPath(); ctx.arc(x, yy, LY.size + 7, 0, 7); ctx.strokeStyle = dark ? "#fff" : "#000"; ctx.lineWidth = 2.2; ctx.stroke(); }
+  }
+});
+const dots = new Dots().addTo(map);
+function hitDot(cp) {
+  if (!P || !NV || S.view === "hex") return -1; const o = map.getPixelOrigin(), off = map.containerPointToLayerPoint([0, 0]), ox = o.x + off.x, oy = o.y + off.y;
+  let best = -1, bd = 64; for (let k = 0; k < NV; k++) { const i = VIS[k], dx = XY[2 * i] - ox - cp.x, dy = XY[2 * i + 1] - oy - cp.y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = i; } }
+  return best;
+}
+function hitHex(cp) {
+  if (!HEX) return null; const r = HEX.r; let q = (Math.sqrt(3) / 3 * cp.x - cp.y / 3) / r, rr = (2 / 3 * cp.y) / r, s = -q - rr; let rq = Math.round(q), rr2 = Math.round(rr), rs = Math.round(s);
+  const dq = Math.abs(rq - q), dr = Math.abs(rr2 - rr), ds = Math.abs(rs - s); if (dq > dr && dq > ds) rq = -rr2 - rs; else if (dr > ds) rr2 = -rq - rs;
+  return HEX.H.get(rq + "," + rr2) || null;
+}
+const when = p => `${p[7] ? p[7].split("-").reverse().map(Number).join("/") + "/" : ""}${p[2]}`;
+const dtip = i => { const p = P[i]; return `<b>${esc(TYPES[p[3]][0])}</b>, ${when(p)}<br>${esc(p[8] || "Ship not named")}<br>${esc(p[9] || RSHORT[p[4]])}`; };
+const htip = h => `<b>${fmt(h.n)} attack${h.n === 1 ? "" : "s"}</b> in this hexagon, ${S.y0 === S.y1 ? S.y0 : S.y0 + " to " + S.y1}<br>` + TYPES.map((t, k) => h.t[k] ? `${esc(t[0])}: ${fmt(h.t[k])}` : "").filter(Boolean).join("<br>");
+map.on("click", e => { const h = hitDot(e.containerPoint); if (h >= 0) return pickAttack(h, false); const x = hitHex(e.containerPoint); if (x) L.popup({ maxWidth: 260 }).setLatLng(e.latlng).setContent(htip(x) + "<br><small>Zoom in to see the dots.</small>").openOn(map); });
+map.on("mousemove", e => { const h = hitDot(e.containerPoint); map.getContainer().style.cursor = h >= 0 ? "pointer" : ""; const r = map.getContainer().getBoundingClientRect();
+  if (h >= 0) return showTip(dtip(h), r.left + e.containerPoint.x, r.top + e.containerPoint.y); const x = hitHex(e.containerPoint); if (x) showTip(htip(x), r.left + e.containerPoint.x, r.top + e.containerPoint.y); else hideTip(); });
+map.on("mouseout", hideTip);
+fetch("data/points.json").then(r => r.json()).then(j => { P = j.rows; Z = -1; dots.draw(); side(); legend(); });
+if (LY.ship) loadShip();
+
+/* ---------- controls ---------- */
+const y0 = document.getElementById("y0"), y1 = document.getElementById("y1");
+function setYears(a, b, fromSlider) {
+  S.y0 = Math.max(Y0, Math.min(a, b)); S.y1 = Math.min(Y1, Math.max(a, b));
+  if (!fromSlider) { y0.value = S.y0; y1.value = S.y1; }
+  document.getElementById("y0v").textContent = S.y0; document.getElementById("y1v").textContent = S.y1;
+  const f = document.getElementById("yfill"), a0 = (Math.min(+y0.value, +y1.value) - Y0) / (Y1 - Y0) * 100, b0 = (Math.max(+y0.value, +y1.value) - Y0) / (Y1 - Y0) * 100; f.style.left = a0 + "%"; f.style.width = (b0 - a0) + "%";
+  document.querySelectorAll("#eraRow .btn").forEach(x => { const [p, q] = x.dataset.y.split(",").map(Number); x.setAttribute("aria-pressed", p === S.y0 && q === S.y1); });
+  dots.draw(); side(); badge();
+}
+[y0, y1].forEach(i => i.addEventListener("input", () => { stop(); setYears(+y0.value, +y1.value, true); }));
+(function eraRow() { const row = document.getElementById("eraRow");
+  ERAS.forEach(([n, a, b]) => { const x = document.createElement("button"); x.className = "btn"; x.dataset.y = a + "," + b; x.textContent = n; row.appendChild(x); });
+  row.querySelectorAll(".btn").forEach(b => b.onclick = () => { stop(); const [p, q] = b.dataset.y.split(",").map(Number); setYears(p, q); }); })();
+const press = (row, b) => document.querySelectorAll(row + " .btn").forEach(x => x.setAttribute("aria-pressed", x === b));
+document.querySelectorAll("#viewRow .btn").forEach(b => b.onclick = () => { S.view = b.dataset.v; press("#viewRow", b); dots.draw(); legend(); });
+document.querySelectorAll("#colRow .btn").forEach(b => b.onclick = () => { S.col = b.dataset.c; press("#colRow", b); dots.draw(); legend(); });
+const resetType = (function filterRow() {
+  const row = document.getElementById("typeRow"), list = TYPES;
+  const all = document.createElement("button"); all.className = "btn"; all.textContent = "All"; all.setAttribute("aria-pressed", "true"); row.appendChild(all);
+  const bs = list.map(([n, c], i) => { const b = document.createElement("button"); b.className = "btn"; b.innerHTML = `<i style="background:${c}"></i>${esc(n)}`; b.setAttribute("aria-pressed", "false"); b.dataset.g = i; row.appendChild(b); return b; });
+  const sync = () => { const allOn = S.type.size === list.length; all.setAttribute("aria-pressed", allOn); bs.forEach(b => b.setAttribute("aria-pressed", !allOn && S.type.has(+b.dataset.g))); dots.draw(); side(); };
+  all.onclick = () => { S.type = new Set(list.map((g, i) => i)); sync(); };
+  bs.forEach(b => b.onclick = () => { const g = +b.dataset.g; if (S.type.size === list.length) S.type = new Set([g]); else if (S.type.has(g)) { S.type.delete(g); if (!S.type.size) S.type = new Set(list.map((x, i) => i)); } else S.type.add(g); sync(); });
+  return () => { S.type = new Set(list.map((g, i) => i)); sync(); };
+})();
+(function regSel() { const s = document.getElementById("regSel"); s.innerHTML = `<option value="-1">All regions</option>` + REGIONS.map((r, i) => `<option value="${i}">${esc(r[0])}</option>`).join("");
+  s.onchange = () => { S.reg = +s.value; dots.draw(); side(); }; })();
+
+/* ---------- play: one year at a time ---------- */
+let timer = null;
+function badge() { const b = document.getElementById("badge"); if (!S.playing || !CNT) { b.innerHTML = ""; return; } b.innerHTML = `${S.y1}<small>${fmt(CNT.n)} attacks shown</small>`; }
+function stop() { if (timer) clearInterval(timer); timer = null; if (S.playing) { S.playing = false; document.getElementById("play").textContent = "▶ Play"; badge(); } }
+document.getElementById("play").onclick = () => {
+  if (S.playing) return stop();
+  S.playing = true; document.getElementById("play").textContent = "❚❚ Pause";
+  let y = S.y0 === S.y1 && S.y1 < Y1 ? S.y1 : Y0; setYears(y, y);
+  timer = setInterval(() => { y++; if (y > Y1) { stop(); return; } setYears(y, y); }, 1100);
+};
+
+/* ---------- legend, side panel ---------- */
+function legend() {
+  const e = document.getElementById("legend"); let h = "";
+  if (S.view !== "hex") h += (S.col === "region" ? REGIONS : TYPES).map(x => `<span><i style="background:${x[1]}"></i>${esc(x[0])}</span>`).join("") + (S.col === "type" ? `<span>larger dots: hijackings</span>` : "");
+  if (S.view !== "dots") h += `<span><i class="hx" style="background:rgb(253,196,110)"></i>fewer</span><span class="ramp" style="background:linear-gradient(90deg,rgb(255,240,196),rgb(253,196,110),rgb(240,128,56),rgb(200,60,40),rgb(130,18,44),rgb(60,8,40))"></span><span>more attacks per hexagon</span>`;
+  if (LY.ship) h += `<span><i class="sq" style="background:rgb(66,110,150)"></i>busy shipping lanes (darker: busier)</span>`;
+  e.innerHTML = h;
+}
+function note(h) { document.getElementById("mapnote").innerHTML = h || ""; }
+const STN = s => STATUS[s].toLowerCase();
+function side() {
+  const box = document.getElementById("side"); let h = "";
+  if (S.met != null && P) {
+    const p = P[S.met], dt = DET ? DET[S.met] : null;
+    h = `<button class="back">Back</button><h4>${esc(REGIONS[p[4]][0])}</h4><div class="big">${esc(TYPES[p[3]][0])}</div><table>
+<tr><td>Date</td><td>${when(p)}</td></tr><tr><td>Ship</td><td>${esc(p[8] || "not named")}${dt && dt[1] ? " (" + esc(dt[1].toLowerCase()) + ")" : ""}</td></tr>
+<tr><td>Ship was</td><td>${esc(STN(p[5]))}</td></tr><tr><td>Where</td><td>${esc(p[9] || "not described")}</td></tr>
+<tr><td>From shore</td><td>${p[6] < 10 ? p[6].toFixed(1) : fmt(p[6])} km${dt && dt[4] ? " (" + esc(dt[4]) + ")" : ""}</td></tr>${dt && dt[3] ? `<tr><td>Waters of</td><td>${esc(dt[3])}</td></tr>` : ""}
+<tr><td>Position</td><td>${p[0].toFixed(3)}, ${p[1].toFixed(3)}</td></tr></table>`;
+    if (dt && dt[0]) h += `<div class="desc">${esc(dt[0])}</div>`;
+    h += `<p class="sub">Source: ${dt ? (dt[5] ? "IMB Piracy Reporting Centre report" : "MAPPING piracy data (IMB and NGA ASAM reports)") : "loading"}, via Benden et al. (2021).${dt && dt[2] && dt[2] !== TYPES[p[3]][0] ? " Recorded type: " + esc(dt[2]) + "." : ""}</p>`;
+    if (!DET) fetch("data/details.json").then(r => r.json()).then(j => { DET = j.rows; side(); });
+  } else if (CNT) {
+    h = `<h4>On the map now</h4><div class="big">${fmt(CNT.n)}</div><p class="sub">attacks, ${S.y0 === S.y1 ? S.y0 : S.y0 + " to " + S.y1}${S.reg >= 0 ? ", " + esc(RSHORT[S.reg]) : ""}</p><table>` +
+      TYPES.map((t, i) => `<tr><td><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${t[1]};margin-right:6px"></i>${esc(t[0])}</td><td class="num">${fmt(CNT.t[i])}</td></tr>`).join("") + `</table>`;
+    const top = REGIONS.map((r, i) => [i, CNT.r[i]]).filter(x => x[1]).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    h += `<h4>Leading regions</h4><table>` + top.map(([i, n]) => `<tr><td><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${REGIONS[i][1]};margin-right:6px"></i><span class="go" data-r="${i}">${esc(RSHORT[i])}</span></td><td class="num">${fmt(n)} <small>${Math.round(100 * n / CNT.n)}%</small></td></tr>`).join("") + `</table>`;
+    const C = new Map(); for (let i = 0; i < P.length; i++) { const p = P[i]; if (!keep(p)) continue; const k = Math.floor(p[0]) + "," + Math.floor(p[1]); C.set(k, (C.get(k) || 0) + 1); }
+    const top5 = [...C.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+    h += `<h4>Busiest 1 degree squares now</h4><ol>` + top5.map(([k, n]) => `<li><span class="go" data-k="${k}">${esc(CELLN[k] || "Square at " + k.split(",").map((v, j) => Math.abs(v) + (j ? (v < 0 ? "°W" : "°E") : (v < 0 ? "°S" : "°N"))).join(", "))}</span> <small>${fmt(n)}</small></li>`).join("") + `</ol>`;
+    h += `<p class="sub">Press play to watch the attacks year by year. Click a dot for the record, or a hexagon for its count. Base map, shipping lanes and labels are under Map layers.</p>`;
+    note("");
+  }
+  box.innerHTML = h;
+  const b = box.querySelector(".back"); if (b) b.onclick = () => { S.met = null; map.closePopup(); dots.draw(); side(); };
+  box.querySelectorAll("[data-r]").forEach(e => e.onclick = () => { S.reg = +e.dataset.r; document.getElementById("regSel").value = S.reg; dots.draw(); side(); });
+  box.querySelectorAll("[data-k]").forEach(e => e.onclick = () => { const [la, lo] = e.dataset.k.split(",").map(Number); map.fitBounds([[la - .6, lo - .6], [la + 1.6, lo + 1.6]]); toMap(); });
+}
+const CELLN = {}; R.eras.forEach(e => e.hotspots.forEach(c => CELLN[c.lat + "," + c.lon] = c.name));
+function toMap() { if (small()) document.getElementById("map").scrollIntoView({ behavior: "smooth", block: "start" }); }
+function goCell(a, k) { const c = R.eras[a].hotspots[k], e = R.eras[a]; stop(); setYears(e.a, e.b); map.fitBounds([[c.lat - .6, c.lon - .6], [c.lat + 1.6, c.lon + 1.6]]); note(`<b>${esc(c.name)}</b>: ${fmt(c.n)} attacks, ${esc(e.name)}`); toMap(); }
+function pickAttack(i, move) {
+  S.met = i; const p = P[i];
+  if (!keep(p)) { if (p[2] < S.y0 || p[2] > S.y1) setYears(Y0, Y1); resetType(); S.reg = -1; document.getElementById("regSel").value = -1; }
+  if (move) { map.setView([p[0], p[1]], Math.max(map.getZoom(), 8)); toMap(); }
+  L.popup({ maxWidth: 280 }).setLatLng([p[0], p[1]]).setContent(`<b>${esc(TYPES[p[3]][0])}</b><br>${when(p)} · ${esc(p[8] || "ship not named")}<br>${esc(p[9] || REGIONS[p[4]][0])}<br>${p[5] === 4 ? "Ship&#39;s state not recorded" : "Ship " + esc(STN(p[5]))}, ${p[6] < 10 ? p[6].toFixed(1) : fmt(p[6])} km from shore`).openOn(map);
+  note(`<b>${esc(TYPES[p[3]][0])}</b>, ${when(p)}`); dots.draw(); side();
+}
+(function focusRow() {
+  const row = document.getElementById("focusRow");
+  const F = [["World", null], ["Strait of Malacca", [[0.5, 95], [7, 104]]], ["Singapore Strait", [[0.7, 103.2], [1.8, 104.8]]], ["Indonesia", [[-9, 95], [6, 125]]], ["South China Sea", [[0, 100], [24, 125]]], ["Bangladesh and India", [[5, 72], [24, 93]]], ["Gulf of Aden", [[9, 41], [16, 54]]], ["Somali Basin", [[-12, 38], [26, 78]]], ["Gulf of Guinea", [[-8, -18], [12, 14]]], ["Caribbean", [[5, -90], [25, -58]]]];
+  F.forEach(([n, b]) => { const x = document.createElement("button"); x.className = "btn"; x.textContent = n; x.onclick = () => { if (!b) { S.met = null; map.closePopup(); map.setView(...HOME()); side(); } else map.fitBounds(b); toMap(); }; row.appendChild(x); });
+})();
+
+/* ---------- search: ships, places and countries ---------- */
+(function search() {
+  const inp = document.getElementById("q"), sug = document.getElementById("sug"); let opts = [], k = -1;
+  const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const cn = Object.entries(SITE.cname);
+  function build(q) {
+    const nq = norm(q); if (nq.length < 2) return [];
+    const out = [];
+    cn.forEach(([iso, n]) => { if (norm(n).includes(nq)) out.push({ t: "c", n, iso, s: norm(n).startsWith(nq) ? 6 : 2 }); });
+    CITIES.forEach(c => { if (c.pop >= 50000 && norm(c.name).startsWith(nq)) out.push({ t: "p", n: c.name, c, s: 3 + Math.log10(c.pop) / 10 }); });
+    if (P) { let m = 0; for (let i = 0; i < P.length; i++) { const nm = norm(P[i][8] || ""), lc = norm(P[i][9] || "");
+      if (nm.includes(nq)) { out.push({ t: "s", n: P[i][8], i, s: nm === nq ? 7 : nm.startsWith(nq) ? 3 : 1 }); if (++m > 400) break; }
+      else if (lc.startsWith(nq) && !out.some(o => o.t === "l" && o.n === P[i][9])) out.push({ t: "l", n: P[i][9], i, s: 2.5 }); } }
+    return out.sort((a, b) => b.s - a.s).slice(0, 12);
+  }
+  const lab = o => o.t === "c" ? `${esc(o.n)} <span>country</span>` : o.t === "p" ? `${esc(o.n)} <span>place</span>` : o.t === "l" ? `${esc(o.n)} <span>attack location</span>` : `${esc(o.n)} <span>${esc(TYPES[P[o.i][3]][0].toLowerCase())}, ${P[o.i][2]}</span>`;
+  const show = () => { sug.innerHTML = opts.map((o, i) => `<li role="option" aria-selected="${i === k}" data-i="${i}">${lab(o)}</li>`).join(""); sug.style.display = opts.length ? "block" : "none"; };
+  const choose = o => { sug.style.display = "none"; inp.value = o.n; inp.blur(); stop();
+    if (o.t === "s" || o.t === "l") return pickAttack(o.i, true);
+    if (o.t === "p") { map.setView([o.c.lat, o.c.lon], 9); return toMap(); }
+    const f = WORLD.features.find(x => x.properties.iso === o.iso); if (f) map.fitBounds(L.geoJSON(f).getBounds(), { padding: [10, 10], maxZoom: 7 }); toMap(); };
+  inp.addEventListener("input", () => { opts = build(inp.value); k = -1; show(); });
+  inp.addEventListener("keydown", e => { if (e.key === "ArrowDown") { k = Math.min(opts.length - 1, k + 1); show(); e.preventDefault(); } else if (e.key === "ArrowUp") { k = Math.max(0, k - 1); show(); e.preventDefault(); } else if (e.key === "Enter" && opts.length) { choose(opts[Math.max(0, k)]); } else if (e.key === "Escape") { sug.style.display = "none"; } });
+  sug.addEventListener("click", e => { const li = e.target.closest("li"); if (li) choose(opts[+li.dataset.i]); });
+  document.addEventListener("click", e => { if (!e.target.closest(".searchbox")) sug.style.display = "none"; });
+})();
+map.on("zoomend moveend", placeNames);
+
+/* ---------- charts ---------- */
+let YMODE = "n", yearRedraw = null;
+function hatch(svg, id, col) { const d = el("defs", {}, svg), p = el("pattern", { id, width: 6, height: 6, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" }, d); el("rect", { width: 6, height: 6, fill: col, opacity: .25 }, p); el("line", { x1: 0, y1: 0, x2: 0, y2: 6, stroke: col, "stroke-width": 2.4 }, p); }
+function yearChart() {
+  const box = document.getElementById("yearChart"), Y = R.years, I = R.imb;
+  document.getElementById("yearLegend").innerHTML = REGIONS.map(([n, c]) => `<span><i class="sq" style="background:${c}"></i>${esc(n)}</span>`).join("") + `<span><i class="sq" style="background:repeating-linear-gradient(45deg,var(--muted) 0 2px,transparent 2px 5px)"></i>IMB headline count, all regions</span>`;
+  yearRedraw = resp(box, (w, sm) => {
+    const share = YMODE === "share", h = sm ? 300 : 380, m = { l: 46, r: 8, t: 22, b: 28 };
+    const svg = el("svg", { viewBox: `0 0 ${w} ${h}`, role: "img", "aria-label": "Pirate attacks per year by region, 1993 to 2020, and IMB totals 2021 to 2026" }, box);
+    hatch(svg, "imbH", css("--muted"));
+    const imbRows = share ? [] : [[2021, I.y2021], [2022, I.y2022], [2023, I.y2023], [2024, I.y2024], [2025, I.y2025], ["2026*", I.q3_2026]];
+    const n = Y.length + imbRows.length + (share ? 0 : .6), bw = (w - m.l - m.r) / n, mx = share ? 1 : 500, H = v => (h - m.t - m.b) * v / mx;
+    const step = share ? .25 : 100; for (let v = 0; v <= mx + 1e-9; v += step) { const y = h - m.b - H(v); el("line", { x1: m.l, x2: w - m.r, y1: y, y2: y, stroke: css("--rule") }, svg); lbl(svg, m.l - 6, y + 4, share ? Math.round(v * 100) + "%" : fmt(v), "lab s m", "end"); }
+    Y.forEach((r, i) => { const tot = r.slice(1).reduce((a, b) => a + b, 0), x = m.l + i * bw; let y = h - m.b;
+      r.slice(1).forEach((v, j) => { if (!v) return; const hh = H(share ? v / tot : v); y -= hh; el("rect", { x: x + .5, y, width: Math.max(.6, bw - 1.5), height: hh, fill: REGIONS[j][1] }, svg); });
+      if (r[0] % (sm ? 5 : 3) === 0 || r[0] === 1993) lbl(svg, x + bw / 2, h - 10, String(r[0]), "lab s m", "middle");
+      const hit = el("rect", { x, y: m.t, width: bw, height: h - m.t - m.b, fill: "transparent" }, svg);
+      hit.addEventListener("mousemove", ev => showTip(`<b>${r[0]}</b>: ${fmt(tot)} attacks mapped<br>` + r.slice(1).map((v, j) => [v, j]).filter(x => x[0]).sort((a, b) => b[0] - a[0]).map(([v, j]) => `${esc(RSHORT[j])}: ${fmt(v)}`).join("<br>"), ev.clientX, ev.clientY)); hit.addEventListener("mouseleave", hideTip); });
+    if (!share) {
+      const x0 = m.l + (Y.length + .6) * bw; el("line", { x1: x0 - .3 * bw, x2: x0 - .3 * bw, y1: m.t - 8, y2: h - m.b, stroke: css("--fg"), "stroke-dasharray": "3 3" }, svg);
+      lbl(svg, x0 - .3 * bw - 5, m.t - 10, "mapped", "lab s m", "end"); lbl(svg, x0 - .3 * bw + 5, m.t - 10, sm ? "IMB" : "IMB counts", "lab s m");
+      imbRows.forEach(([yy, v], k) => { const x = x0 + k * bw, part = String(yy).includes("*");
+        const b = el("rect", { x: x + .5, y: h - m.b - H(v), width: bw - 1.5, height: H(v), fill: "url(#imbH)", stroke: css("--muted"), "stroke-width": .8, "stroke-dasharray": part ? "2 2" : "" }, svg);
+        if (k === 0 || k === 5 || (!sm && k === 3)) lbl(svg, x + bw / 2, h - 10, part ? (sm ? "26*" : "2026*") : String(yy), "lab s m", "middle");
+        b.addEventListener("mousemove", ev => showTip(`<b>${part ? "2026, January to September" : yy}</b>: ${fmt(v)} incidents (IMB headline count)`, ev.clientX, ev.clientY)); b.addEventListener("mouseleave", hideTip); });
+      const pk = Y.findIndex(r => r[0] === R.peak_year); lbl(svg, m.l + pk * bw + bw / 2, h - m.b - H(R.peak_n) - 6, fmt(R.peak_n), "lab s b", "middle");
+      const sk = Y.findIndex(r => r[0] === R.som.peak_year), sy = h - m.b - H(R.by_year[String(R.som.peak_year)]);
+      lbl(svg, m.l + sk * bw + bw / 2, sy - 6, sm ? "Somalia" : "Somali surge", "lab s b", "middle").setAttribute("style", `fill:${css("--hot")}`);
+    }
+  });
+}
+document.querySelectorAll("#yrMode .btn").forEach(b => b.onclick = () => { YMODE = b.dataset.m; press("#yrMode", b); if (yearRedraw) yearRedraw(); });
+function eraGrid() {
+  const g = document.getElementById("eraGrid");
+  g.innerHTML = R.eras.map((e, a) => { const mx = e.hotspots[0].n; return `<div class="erabox"><h4>${esc(e.name)}</h4><p>${fmt(e.n)} attacks · leading region: ${esc(RSHORT[e.top_region])} (${Math.round(e.top_region_pct)}%)</p>` +
+    e.hotspots.slice(0, 5).map((c, k) => `<div class="row" data-c="${a},${k}"><div><span class="nm">${esc(c.name)}</span><div class="bar" style="width:${100 * c.n / mx}%;background:${REGIONS[c.region][1]}"></div></div><div class="v">${fmt(c.n)}</div></div>`).join("") + `</div>`; }).join("");
+  g.querySelectorAll("[data-c]").forEach(e => e.onclick = () => { const [a, k] = e.dataset.c.split(",").map(Number); document.getElementById("atlas").scrollIntoView({ behavior: "smooth" }); setTimeout(() => goCell(a, k), 300); });
+}
+function typeChart() {
+  const box = document.getElementById("typeChart"), order = [1, 2, 0, 3, 4];
+  document.getElementById("typeLegend").innerHTML = order.map(k => `<span><i class="sq" style="background:${TYPES[k][1]}"></i>${esc(TYPES[k][0])}</span>`).join("");
+  resp(box, (w, sm) => {
+    const lw = sm ? 98 : 120, rh = 38, h = R.eras.length * rh + 8, x0 = lw, x1 = w - 4;
+    const svg = el("svg", { viewBox: `0 0 ${w} ${h}`, role: "img", "aria-label": "Share of attack types by era" }, box);
+    R.eras.forEach((e, i) => { const y = 4 + i * rh, tot = e.n; let x = x0;
+      lbl(svg, x0 - 8, y + 16, e.name, "lab b", "end"); lbl(svg, x0 - 8, y + 29, fmt(tot) + " attacks", "lab s m", "end");
+      order.forEach(k => { const v = e.by_type[k]; if (!v) return; const bw = (x1 - x0) * v / tot; const b = el("rect", { x, y: y + 2, width: Math.max(.5, bw - .5), height: rh - 10, fill: TYPES[k][1] }, svg);
+        if (bw > 32) lbl(svg, x + 4, y + 20, Math.round(100 * v / tot) + "%", "lab s").setAttribute("style", "fill:#fff;font-weight:500");
+        b.addEventListener("mousemove", ev => showTip(`<b>${esc(e.name)}: ${esc(TYPES[k][0])}</b><br>${fmt(v)} attacks (${(100 * v / tot).toFixed(1)}%)`, ev.clientX, ev.clientY)); b.addEventListener("mouseleave", hideTip); x += bw; }); });
+  });
+}
+function kmChart() {
+  const box = document.getElementById("kmChart");
+  document.getElementById("kmLegend").innerHTML = `<span><i style="background:#B3202A"></i>Somali waters, Gulf of Aden, Red Sea and Arabian Sea</span><span><i style="background:#7C8794"></i>everywhere else</span><span><i class="sq" style="background:var(--fg);height:3px"></i>median per year</span>`;
+  let pts = null;
+  const draw = () => resp(box, (w, sm) => {
+    const h = sm ? 320 : 400, m = { l: 64, r: 10, t: 12, b: 28 }, svg = el("svg", { viewBox: `0 0 ${w} ${h}`, role: "img", "aria-label": "Distance from shore of every attack, 1993 to 2020, log scale" }, box);
+    const X = y => m.l + (y - 1993) / 28 * (w - m.l - m.r), lmin = Math.log10(.05), lmax = Math.log10(1500), Yv = v => h - m.b - (Math.log10(Math.max(.05, v)) - lmin) / (lmax - lmin) * (h - m.t - m.b);
+    [0.1, 1, 10, 100, 1000].forEach(v => { const y = Yv(v); el("line", { x1: m.l, x2: w - m.r, y1: y, y2: y, stroke: css("--rule") }, svg); lbl(svg, m.l - 6, y + 4, v >= 1 ? fmt(v) + " km" : v + " km", "lab s m", "end"); });
+    const y185 = Yv(185.2); el("line", { x1: m.l, x2: w - m.r, y1: y185, y2: y185, stroke: css("--hot"), "stroke-dasharray": "4 3", opacity: .7 }, svg); lbl(svg, m.l + 4, y185 - 5, "100 nautical miles", "lab s halo").setAttribute("style", `fill:${css("--hot")}`);
+    for (let y = 1995; y <= 2020; y += sm ? 5 : 5) lbl(svg, X(y + .5), h - 8, String(y), "lab s m", "middle");
+    const g = el("g", {}, svg);
+    pts.forEach(p => { const s = p[4] === 1, c = el("circle", { cx: X(p[2] + p[10]), cy: Yv(p[6]), r: s ? 1.9 : 1.5, fill: s ? "#B3202A" : "#7C8794", opacity: s ? .55 : .3 }, g); });
+    const line = (k, col) => { let d = ""; R.km_by_year.forEach(r => { if (r[k] == null) { d += " "; return; } d += (d.endsWith(" ") || !d ? "M" : "L") + X(r[0] + .5) + "," + Yv(r[k]); }); el("path", { d: d.trim().replace(/ +M/g, " M"), fill: "none", stroke: col, "stroke-width": 2.6 }, svg); };
+    line(2, css("--fg")); line(1, "#B3202A");
+    R.km_by_year.forEach(r => { if (r[1] != null) { const c = el("circle", { cx: X(r[0] + .5), cy: Yv(r[1]), r: 3.4, fill: "#B3202A", stroke: css("--card"), "stroke-width": 1.2 }, svg); c.addEventListener("mousemove", ev => showTip(`<b>${r[0]}</b>, Somali waters: median ${fmt(r[1])} km from shore (${r[3]} attacks)<br>Everywhere else: ${r[2].toFixed(1)} km`, ev.clientX, ev.clientY)); c.addEventListener("mouseleave", hideTip); } });
+    const pk = R.km_by_year.find(r => r[0] === R.som_km_peak_year); lbl(svg, X(pk[0] + .5) - 10, Yv(1500) + 12, sm ? `${pk[0]}: median ${fmt(pk[1])} km` : `Somali waters, ${pk[0]}: median ${fmt(pk[1])} km`, "lab s b halo", "end").setAttribute("style", `fill:#B3202A`);
+    svg.addEventListener("mousemove", ev => { const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) * w / r.width, sy = (ev.clientY - r.top) * h / r.height; let best = null, bd = 30;
+      for (const p of pts) { const dx = X(p[2] + p[10]) - sx, dy = Yv(p[6]) - sy, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = p; } }
+      if (best && !ev.target.matches("circle[stroke]")) showTip(`<b>${esc(TYPES[best[3]][0])}</b>, ${when(best)}<br>${esc(best[9] || RSHORT[best[4]])}<br>${best[6] < 10 ? best[6].toFixed(1) : fmt(best[6])} km from shore`, ev.clientX, ev.clientY); else if (!ev.target.matches("circle[stroke]")) hideTip(); });
+    svg.addEventListener("mouseleave", hideTip);
+  });
+  const wait = setInterval(() => { if (!P) return; clearInterval(wait); pts = P.map(p => { const md = p[7] ? p[7].split("-").map(Number) : [6, 15]; return [...p, ((md[0] - 1) * 30.4 + md[1]) / 366]; }); draw(); }, 200);
+}
+function shipChart() {
+  const B = R.ship.bins;
+  resp(document.getElementById("shipChart"), (w, sm) => {
+    const lw = sm ? 100 : 130, rh = 34, h = B.length * rh + 30, x0 = lw, x1 = w - 60, mx = 40;
+    const s =el("svg", { viewBox: `0 0 ${w} ${h}`, role: "img", "aria-label": "Share of attacks by shipping traffic class" }, document.getElementById("shipChart"));
+    lbl(s, x0, 12, "share of all attacks", "lab s m");
+    B.forEach((b, i) => { const y = 20 + i * rh, bw = (x1 - x0) * b.attacks_pct / mx, shade = ["#143A68", "#285480", "#3E6E98", "#6E92B4", "#A3BCD2", "#CCD9E5"][i];
+      lbl(s, x0 - 8, y + 14, b.name, "lab b", "end"); lbl(s, x0 - 8, y + 26, "of squares", "lab s m", "end");
+      const r = el("rect", { x: x0, y: y + 3, width: Math.max(1.5, bw), height: rh - 12, fill: shade, rx: 2 }, s);
+      lbl(s, x0 + Math.max(1.5, bw) + 6, y + 18, b.attacks_pct.toFixed(b.attacks_pct < 1 ? 1 : 0) + "%", "lab b");
+      r.addEventListener("mousemove", ev => showTip(`<b>${esc(b.name)}</b> of 1 degree squares by traffic<br>${b.attacks_pct.toFixed(1)}% of all attacks`, ev.clientX, ev.clientY)); r.addEventListener("mouseleave", hideTip); });
+  });
+}
+function todayChart() {
+  const I = R.imb, G = [["World total", "#4F5B66", [I.y2023, I.y2024, I.y2025, I.q3_2026]], ["Singapore Strait", "#173F5F", [null, I.sin_2024, I.sin_2025, I.sin_q3_2026]], ["Indonesia", "#3E7CB1", [I.idn_2023, I.idn_2024, I.idn_2025, I.idn_q3_2026]], ["Gulf of Guinea", "#C9A227", [I.gog_2023, I.gog_2024, I.gog_2025, I.gog_q3_2026]]];
+  const P4 = ["2023", "2024", "2025", "2026 Jan to Sep"], OP = [.35, .55, .8, 1];
+  document.getElementById("todayLegend").innerHTML = P4.map((p, k) => `<span><i class="sq" style="background:#4F5B66;opacity:${OP[k]}"></i>${p}</span>`).join("");
+  resp(document.getElementById("todayChart"), (w, sm) => {
+    const h = sm ? 260 : 280, m = { l: 36, r: 6, t: 18, b: 34 }, svg = el("svg", { viewBox: `0 0 ${w} ${h}`, role: "img", "aria-label": "IMB headline counts 2023 to 2026 by region" }, document.getElementById("todayChart"));
+    const mx = 140, Hh = v => (h - m.t - m.b) * v / mx, gw = (w - m.l - m.r) / G.length, bw = Math.min(34, (gw - 16) / 4);
+    for (let v = 0; v <= mx; v += 20) { const y = h - m.b - Hh(v); el("line", { x1: m.l, x2: w - m.r, y1: y, y2: y, stroke: css("--rule") }, svg); lbl(svg, m.l - 6, y + 4, v, "lab s m", "end"); }
+    G.forEach(([n, c, vs], g) => { const gx = m.l + g * gw + (gw - 4 * bw) / 2;
+      lbl(svg, m.l + g * gw + gw / 2, h - 12, sm && n.length > 12 ? n.replace("Singapore Strait", "Singapore").replace("Gulf of Guinea", "G. of Guinea").replace("World total", "World") : n, "lab s b", "middle");
+      vs.forEach((v, k) => { const x = gx + k * bw; if (v == null) { lbl(svg, x + bw / 2, h - m.b - 4, "·", "lab m", "middle"); return; }
+        const r = el("rect", { x: x + 1, y: h - m.b - Hh(v), width: bw - 2, height: Hh(v), fill: c, opacity: OP[k] }, svg);
+        if (!sm || v >= 40) lbl(svg, x + bw / 2, h - m.b - Hh(v) - 4, v, "lab s", "middle");
+        r.addEventListener("mousemove", ev => showTip(`<b>${esc(n)}, ${P4[k]}</b><br>${fmt(v)} incidents (IMB)`, ev.clientX, ev.clientY)); r.addEventListener("mouseleave", hideTip); }); });
+  });
+  const t = document.getElementById("imbTable"), link = s => esc(s).replace(/(https?:\/\/[^\s;]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+  t.innerHTML = `<thead><tr><th>Period</th><th class="r">Incidents</th><th>Source and notes</th></tr></thead><tbody>` + I.sources.map(s => `<tr><td>${esc(s.period.replace("Jan-Sep", "January to September"))}</td><td class="r">${fmt({ "2021": I.y2021, "2022": I.y2022, "2023": I.y2023, "2024": I.y2024, "2025": I.y2025, "2025 Jan-Sep": I.q3_2025, "2026 Jan-Sep": I.q3_2026 }[s.period])}</td><td>${link(s.src.replace("Jan-Dec", "January to December"))}</td></tr>`).join("") + `</tbody>`;
+}
+function charts() { yearChart(); eraGrid(); typeChart(); kmChart(); shipChart(); todayChart(); }
+
+/* ---------- start ---------- */
+document.getElementById("theme").onclick = () => { const r = document.documentElement; r.dataset.theme = isDark() ? "light" : "dark"; setTiles(); legend(); redraws.forEach(f => f()); };
+charts(); setTiles(); legend(); setYears(Y0, Y1); placeNames(); side();
+</script>
+/*FULLSCREEN*/
+</body>
+</html>
