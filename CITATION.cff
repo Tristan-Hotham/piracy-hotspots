@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this data or code, please cite it as below."
+title: "Pirate Hotspots, Then and Now: How Maritime Piracy Moved around the World, 1993 to 2026"
+type: dataset
+authors:
+  - family-names: Hotham
+    given-names: Tristan
+    orcid: "https://orcid.org/0000-0003-4931-9349"
+    affiliation: "Independent researcher"
+doi: "10.5281/zenodo.23856383"
+url: "https://maps.tristanhotham.com/piracy-hotspots/"
+repository-code: "https://github.com/Tristan-Hotham/piracy-hotspots"
+license: CC-BY-4.0
+keywords:
+  - "maritime piracy"
+  - "armed robbery at sea"
+  - "Somalia"
+  - "Gulf of Guinea"
+  - "Strait of Malacca"
+  - "Singapore Strait"
+  - "IMB"
+  - "shipping"
+  - "open data"
+  - "maps"
